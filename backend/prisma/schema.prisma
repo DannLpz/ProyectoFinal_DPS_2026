@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  displayName  String
+  role         String   @default("buyer")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  generatedFurniture Furniture[] @relation("UserGeneratedFurniture")
+}
+
+model Furniture {
+  id            String   @id @default(uuid())
+  name          String
+  description   String
+  category      String
+  modelUrl      String
+  thumbnailUrl  String
+  source        String   @default("default") // "default" o "ai-generated"
+  prompt        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  generatedById String?
+  generatedBy   User?    @relation("UserGeneratedFurniture", fields: [generatedById], references: [id])
+}
