@@ -1,0 +1,26 @@
+# Node modules (enorme, nunca subir)
+node_modules/
+*/node_modules/
+
+# Variables de entorno (secretos)
+.env
+*/.env
+
+# Builds
+dist/
+*/dist/
+build/
+*/build/
+.expo/
+*/.expo/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# ZIPs
+*.zip
