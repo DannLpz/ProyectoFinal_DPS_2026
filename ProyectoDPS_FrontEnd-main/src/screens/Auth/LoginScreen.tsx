@@ -6,7 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ScreenContainer } from '../../components/common/ScreenContainer';
 import { AppLogo } from '../../components/common/AppLogo';
 import { theme } from '../../config/theme';
-import { MockAuthService } from '../../services/MockAuthService';
+import { RealAuthService } from '../../services/RealAuthService';
 import { useAuthStore } from '../../store/useAuthStore';
 import type { RootStackParamList } from '../../navigation/types';
 
@@ -28,8 +28,7 @@ export function LoginScreen() {
 const handleLogin = async () => {
   setIsLoading(true);
   setError('');
-
-  const authService = new MockAuthService(); // 👈 Vuelve al mock
+const authService = new RealAuthService();
   const result = await authService.authenticate({ identifier, password });
 
   if (result.success) {

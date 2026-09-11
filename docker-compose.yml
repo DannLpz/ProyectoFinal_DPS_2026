@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -13,6 +11,42 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - looka_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: looka_backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public
+      JWT_SECRET: looka_super_secret_key_cambiar_en_produccion
+      PORT: 3000
+    ports:
+      - '3000:3000'
+    networks:
+      - looka_network
+
+  frontend:
+    build:
+      context: ./ProyectoDPS_FrontEnd-main
+      dockerfile: Dockerfile
+    container_name: looka_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '8083:80'
+    networks:
+      - looka_network
 
 volumes:
   postgres_data:
+
+networks:
+  looka_network:
+    driver: bridge

@@ -83,19 +83,33 @@ export function HomeScreen() {
           </View>
 
           <View style={styles.heroCard}>
-            <View style={styles.heroDecoration} />
-            <Text style={styles.heroTitle}>Tu espacio, antes de comprar</Text>
-            <View style={styles.heroFooter}>
-              <View style={styles.heroIconStack}>
-                <View style={[styles.stackIcon, styles.stackIconFront]}>
-                  <Feather color={theme.colors.primary} name="camera" size={16} />
-                </View>
-                <View style={[styles.stackIcon, styles.stackIconBack]}>
-                  <Feather color={theme.colors.brown} name="move" size={16} />
-                </View>
-              </View>
-            </View>
-          </View>
+  <View style={styles.heroDecoration} />
+  <View style={styles.heroDecoration2} />
+
+  <View style={styles.heroBadge}>
+    <Feather name="star" size={11} color={theme.colors.cream} />
+    <Text style={styles.heroBadgeText}>NUEVO · IA + AR</Text>
+  </View>
+
+  <Text style={styles.heroTitle}>
+    Tu espacio, antes{'\n'}de comprar
+  </Text>
+  <Text style={styles.heroDescription}>
+    Visualiza muebles en 3D, genera diseños con IA y proyéctalos en tu hogar.
+  </Text>
+
+  <View style={styles.heroFooter}>
+    <View style={styles.heroIconStack}>
+      <View style={[styles.stackIcon, styles.stackIconFront]}>
+        <Feather color={theme.colors.primary} name="camera" size={16} />
+      </View>
+      <View style={[styles.stackIcon, styles.stackIconBack]}>
+        <Feather color={theme.colors.brown} name="move" size={16} />
+      </View>
+    </View>
+    <Text style={styles.heroFooterText}>Explora el catálogo ahora</Text>
+  </View>
+</View>
 
           <View style={styles.sectionHeader}>
             <View style={styles.sectionHeaderCopy}>
@@ -224,9 +238,44 @@ const styles = StyleSheet.create({
     top: -70,
     width: 180,
   },
+  heroDecoration2: {
+    borderColor: 'rgba(247, 234, 214, 0.08)',
+    borderRadius: theme.radii.pill,
+    borderWidth: 20,
+    height: 140,
+    position: 'absolute',
+    pointerEvents: 'none',
+    left: -40,
+    bottom: -40,
+    width: 140,
+  },
+  heroBadge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(247, 234, 214, 0.15)',
+    borderRadius: theme.radii.pill,
+    flexDirection: 'row',
+    gap: theme.spacing.xxs,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xxs,
+    marginBottom: theme.spacing.md,
+    width: 'auto',
+    alignSelf: 'flex-start',
+  },
+  heroBadgeText: {
+    ...theme.typography.caption,
+    color: theme.colors.cream,
+    fontWeight: '600',
+    fontSize: 10,
+  },
   heroTitle: {
     ...theme.typography.heading,
     color: theme.colors.white,
+    maxWidth: 480,
+  },
+  heroDescription: {
+    ...theme.typography.body,
+    color: theme.colors.cream,
+    marginTop: theme.spacing.sm,
     maxWidth: 480,
   },
   heroFooter: {
@@ -234,6 +283,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: theme.spacing.sm,
     marginTop: theme.spacing.lg,
+  },
+  heroFooterText: {
+    ...theme.typography.caption,
+    color: theme.colors.cream,
   },
   heroIconStack: {
     height: 34,

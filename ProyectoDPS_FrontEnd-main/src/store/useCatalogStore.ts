@@ -1,16 +1,24 @@
 import { create } from 'zustand';
-import { Furniture } from '../models/Furniture';
+import type { Furniture } from '../models/Furniture';
 
 interface CatalogState {
   defaultFurniture: Furniture[];
   generatedFurniture: Furniture[];
   setDefaultFurniture: (items: Furniture[]) => void;
+  setGeneratedFurniture: (items: Furniture[]) => void;
   addGeneratedFurniture: (item: Furniture) => void;
+  clearGeneratedFurniture: () => void;
 }
 
 export const useCatalogStore = create<CatalogState>((set) => ({
   defaultFurniture: [],
   generatedFurniture: [],
   setDefaultFurniture: (items) => set({ defaultFurniture: items }),
-  addGeneratedFurniture: (item) => set((state) => ({ generatedFurniture: [...state.generatedFurniture, item] })),
+  setGeneratedFurniture: (items) => set({ generatedFurniture: items }),
+  addGeneratedFurniture: (item) =>
+    set((state) => ({
+      // Lo agregamos al inicio para que aparezca primero
+      generatedFurniture: [item, ...state.generatedFurniture],
+    })),
+  clearGeneratedFurniture: () => set({ generatedFurniture: [] }),
 }));
