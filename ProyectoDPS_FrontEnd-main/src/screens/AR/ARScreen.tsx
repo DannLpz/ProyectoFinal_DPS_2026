@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Linking,
+  Platform,       
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -11,15 +13,14 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
+import { BASE_URL } from '../../services/apiClient';
+import { buildModelUrl } from '../../utils/buildModelUrl';
 import { theme } from '../../config/theme';
 import { FurnitureService } from '../../services/FurnitureService';
 import { useCatalogStore } from '../../store/useCatalogStore';
 import type { Furniture } from '../../models/Furniture';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
-const BASE_URL = API_URL.replace('/api', '');
 
-// Emoji e ícono por categoría
 const CATEGORY_META: Record<string, { emoji: string; color: string }> = {
   silla: { emoji: '🪑', color: '#E8A87C' },
   mesa: { emoji: '🍽️', color: '#B5C7A3' },
@@ -34,7 +35,6 @@ export function ARScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 👇 Leemos del store global para sincronización instantánea
   const defaultFurniture = useCatalogStore((s) => s.defaultFurniture);
   const generatedFurniture = useCatalogStore((s) => s.generatedFurniture);
   const setDefaultFurniture = useCatalogStore((s) => s.setDefaultFurniture);
@@ -46,31 +46,54 @@ export function ARScreen() {
   const loadDefaultFurniture = async () => {
     try {
       setLoading(true);
+      console.log('🔍 [DIAG] BASE_URL:', BASE_URL);
+      console.log('🔍 [DIAG] Cargando muebles desde:', `${BASE_URL}/furniture/default`);
+
       const defaults = await FurnitureService.getDefaultFurniture();
+
+      console.log('🔍 [DIAG] Muebles recibidos:', defaults.length);
+      defaults.forEach((m) => {
+        console.log(`🔍 [DIAG] ${m.name} → modelUrl original: ${m.modelUrl}`);
+        console.log(`🔍 [DIAG] ${m.name} → URL construida: ${buildModelUrl(m.modelUrl)}`);
+      });
+
       setDefaultFurniture(defaults);
-    } catch (err) {
+    } catch (err: any) {
+      console.error('❌ [DIAG] Error cargando muebles:', err);
+      if (err?.response) {
+        console.error('❌ [DIAG] Status:', err.response.status);
+        console.error('❌ [DIAG] Data:', err.response.data);
+      }
       setError('No pudimos cargar los muebles');
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const openARInBrowser = async (item: Furniture) => {
-    const url = `${BASE_URL}/ar/viewer?model=${encodeURIComponent(
-      item.modelUrl
-    )}&name=${encodeURIComponent(item.name)}`;
+ const openARInBrowser = async (item: Furniture) => {
+  const apiBase = BASE_URL.replace('/api', '');
+  const modelUrl = buildModelUrl(item.modelUrl);
+  const url = `${apiBase}/ar/viewer?model=${encodeURIComponent(modelUrl)}&name=${encodeURIComponent(item.name)}`;
 
-    try {
+  console.log('🔍 [DIAG] modelUrl construida:', modelUrl);
+  console.log('🔍 [DIAG] URL final del visor:', url);
+
+  try {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') {
+        window.open(url, '_blank');
+      }
+    } else {
       await Linking.openURL(url);
-    } catch (err) {
-      console.warn('No se pudo abrir la URL:', url, err);
     }
-  };
+  } catch (err) {
+    console.warn('❌ [DIAG] No se pudo abrir la URL:', url, err);
+    Alert.alert('Error', 'No se pudo abrir el visor.');
+  }
+};
 
   const totalCount = defaultFurniture.length + generatedFurniture.length;
 
-  // ---- Loading ----
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -82,25 +105,28 @@ export function ARScreen() {
     );
   }
 
-  // ---- Error ----
   if (error) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.center}>
           <Text style={styles.errorText}>{error}</Text>
+          <Pressable
+            style={{ marginTop: 20, padding: 12, backgroundColor: theme.colors.primary, borderRadius: 8 }}
+            onPress={loadDefaultFurniture}
+          >
+            <Text style={{ color: 'white', fontWeight: '700' }}>Reintentar</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );
   }
 
-  // ---- Contenido ----
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* HERO */}
         <View style={styles.hero}>
           <View style={styles.heroIconCircle}>
             <Feather name="camera" size={28} color={theme.colors.white} />
@@ -110,9 +136,11 @@ export function ARScreen() {
           <Text style={styles.heroSubtitle}>
             Proyecta muebles a escala real en tu hogar usando la cámara
           </Text>
+          <Text style={[styles.heroSubtitle, { fontSize: 9, marginTop: 8, opacity: 0.5 }]}>
+            API: {BASE_URL}
+          </Text>
         </View>
 
-        {/* STATS */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{defaultFurniture.length}</Text>
@@ -132,16 +160,13 @@ export function ARScreen() {
           </View>
         </View>
 
-        {/* TIPS */}
         <View style={styles.tipBox}>
           <Feather name="info" size={16} color={theme.colors.primary} />
           <Text style={styles.tipText}>
-            Toca un mueble y luego "Ver en mi espacio real" para activar la
-            cámara.
+            Toca un mueble y luego "Ver en mi espacio real" para activar la cámara.
           </Text>
         </View>
 
-        {/* SECCIÓN: GENERADOS POR IA */}
         {generatedFurniture.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -151,7 +176,6 @@ export function ARScreen() {
                 <Text style={styles.newBadgeText}>NUEVO</Text>
               </View>
             </View>
-
             {generatedFurniture.map((item) => (
               <FurnitureCard
                 key={item.id}
@@ -163,13 +187,11 @@ export function ARScreen() {
           </View>
         )}
 
-        {/* SECCIÓN: PREDETERMINADOS */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionEmoji}>🛒</Text>
             <Text style={styles.sectionTitle}>Catálogo estándar</Text>
           </View>
-
           {defaultFurniture.map((item) => (
             <FurnitureCard
               key={item.id}
@@ -183,9 +205,6 @@ export function ARScreen() {
   );
 }
 
-// ============================
-// Componente de tarjeta
-// ============================
 function FurnitureCard({
   item,
   onPress,
@@ -195,15 +214,16 @@ function FurnitureCard({
   onPress: () => void;
   isAI?: boolean;
 }) {
-  const meta = CATEGORY_META[item.category] ?? CATEGORY_META['generado'];
+  // Fallback hardcodeado (evita el error de TypeScript)
+  const fallbackMeta = { emoji: '🪑', color: '#E8A87C' };
+  const meta = CATEGORY_META[item.category] ?? fallbackMeta;
 
   return (
     <View style={styles.card}>
       <View style={styles.cardRow}>
-        <View style={[styles.cardIconBox, { backgroundColor: meta?.color + '30' }]}>
-          <Text style={styles.cardEmoji}>{meta?.emoji}</Text>
+        <View style={[styles.cardIconBox, { backgroundColor: meta.color + '30' }]}>
+          <Text style={styles.cardEmoji}>{meta.emoji}</Text>
         </View>
-
         <View style={styles.cardBody}>
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardTitle} numberOfLines={1}>
@@ -220,12 +240,8 @@ function FurnitureCard({
           </Text>
         </View>
       </View>
-
       <Pressable
-        style={({ pressed }) => [
-          styles.arButton,
-          pressed && styles.arButtonPressed,
-        ]}
+        style={({ pressed }) => [styles.arButton, pressed && styles.arButtonPressed]}
         onPress={onPress}
       >
         <Feather name="camera" size={16} color={theme.colors.white} />
@@ -237,23 +253,11 @@ function FurnitureCard({
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.colors.background },
-  scrollContent: {
-    paddingBottom: theme.spacing.xxl,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing.lg,
-  },
-  loadingText: {
-    ...theme.typography.body,
-    color: theme.colors.textMuted,
-    marginTop: theme.spacing.md,
-  },
+  scrollContent: { paddingBottom: theme.spacing.xxl },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: theme.spacing.lg },
+  loadingText: { ...theme.typography.body, color: theme.colors.textMuted, marginTop: theme.spacing.md },
   errorText: { ...theme.typography.body, color: 'red', textAlign: 'center' },
 
-  // HERO
   hero: {
     alignItems: 'center',
     paddingHorizontal: theme.spacing.lg,
@@ -270,17 +274,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
     ...theme.shadows.subtle,
   },
-  heroEyebrow: {
-    ...theme.typography.overline,
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.xxs,
-  },
-  heroTitle: {
-    ...theme.typography.heading,
-    color: theme.colors.text,
-    fontSize: 26,
-    textAlign: 'center',
-  },
+
+  heroEyebrow: { ...theme.typography.overline, color: theme.colors.primary, marginBottom: theme.spacing.xxs },
+  heroTitle: { ...theme.typography.heading, color: theme.colors.text, fontSize: 26, textAlign: 'center' },
   heroSubtitle: {
     ...theme.typography.caption,
     color: theme.colors.textMuted,
@@ -290,7 +286,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
   },
 
-  // STATS
   statsRow: {
     flexDirection: 'row',
     gap: theme.spacing.sm,
@@ -306,15 +301,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
-  statCardAccent: {
-    backgroundColor: theme.colors.primarySoft,
-    borderColor: '#F4A4B8',
-  },
-  statNumber: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: theme.colors.text,
-  },
+  statCardAccent: { backgroundColor: theme.colors.primarySoft, borderColor: '#F4A4B8' },
+  statNumber: { fontSize: 22, fontWeight: '800', color: theme.colors.text },
   statNumberAccent: { color: theme.colors.primary },
   statLabel: {
     fontSize: 10,
@@ -325,7 +313,6 @@ const styles = StyleSheet.create({
   },
   statLabelAccent: { color: theme.colors.primary },
 
-  // TIP
   tipBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -343,11 +330,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // SECCIONES
-  section: {
-    paddingHorizontal: theme.spacing.lg,
-    marginTop: theme.spacing.lg,
-  },
+  section: { paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.lg },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -355,11 +338,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   sectionEmoji: { fontSize: 20 },
-  sectionTitle: {
-    ...theme.typography.bodyStrong,
-    color: theme.colors.text,
-    fontSize: 17,
-  },
+  sectionTitle: { ...theme.typography.bodyStrong, color: theme.colors.text, fontSize: 17 },
   newBadge: {
     backgroundColor: '#F4A4B8',
     paddingHorizontal: theme.spacing.sm,
@@ -367,14 +346,8 @@ const styles = StyleSheet.create({
     borderRadius: theme.radii.pill,
     marginLeft: 'auto',
   },
-  newBadgeText: {
-    color: theme.colors.white,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
+  newBadgeText: { color: theme.colors.white, fontSize: 9, fontWeight: '800', letterSpacing: 0.5 },
 
-  // CARD
   card: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radii.lg,
@@ -384,11 +357,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
     ...theme.shadows.subtle,
   },
-  cardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
-  },
+  cardRow: { flexDirection: 'row', alignItems: 'center', marginBottom: theme.spacing.md },
   cardIconBox: {
     width: 52,
     height: 52,
@@ -399,28 +368,15 @@ const styles = StyleSheet.create({
   },
   cardEmoji: { fontSize: 26 },
   cardBody: { flex: 1 },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.xs,
-  },
-  cardTitle: {
-    ...theme.typography.bodyStrong,
-    color: theme.colors.text,
-    flexShrink: 1,
-    fontSize: 16,
-  },
+  cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs },
+  cardTitle: { ...theme.typography.bodyStrong, color: theme.colors.text, flexShrink: 1, fontSize: 16 },
   aiBadge: {
     backgroundColor: theme.colors.primary,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: theme.radii.pill,
   },
-  aiBadgeText: {
-    color: theme.colors.white,
-    fontSize: 9,
-    fontWeight: '800',
-  },
+  aiBadgeText: { color: theme.colors.white, fontSize: 9, fontWeight: '800' },
   cardDescription: {
     ...theme.typography.caption,
     color: theme.colors.textMuted,
@@ -437,9 +393,5 @@ const styles = StyleSheet.create({
     borderRadius: theme.radii.md,
   },
   arButtonPressed: { opacity: 0.85 },
-  arButtonText: {
-    ...theme.typography.bodyStrong,
-    color: theme.colors.white,
-    fontSize: 14,
-  },
+  arButtonText: { ...theme.typography.bodyStrong, color: theme.colors.white, fontSize: 14 },
 });

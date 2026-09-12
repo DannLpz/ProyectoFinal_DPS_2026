@@ -3,24 +3,15 @@ const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
-// URL base del backend (para servir los modelos locales)
-// En Docker, el backend está accesible desde la red local con la IP de tu PC.
-// Si quieres que funcione desde el iPhone, usa la IP real (ej: http://192.168.1.9:3000)
-const BACKEND_URL = process.env.BACKEND_URL || 'http://192.168.1.9:3000';
-
-// URLs de los modelos (servidos desde el propio backend)
+// Rutas RELATIVAS (sin dominio ni IP). El frontend las completa.
 const MODELS = {
-  silla: `${BACKEND_URL}/models/silla.glb`,
-  mesa: `${BACKEND_URL}/models/mesa.glb`,
-  sofa: `${BACKEND_URL}/models/sofa.glb`,
-  cama: `${BACKEND_URL}/models/cama.glb`,
-  ropero: `${BACKEND_URL}/models/ropero.glb`,
-  estante: `${BACKEND_URL}/models/estante.glb`,
+  silla: '/models/silla.glb',
+  mesa: '/models/mesa.glb',
+  sofa: '/models/sofa.glb',
+  cama: '/models/cama.glb',
+  ropero: '/models/ropero.glb',
+  estante: '/models/estante.glb',
 };
-
-// Imágenes placeholder con el branding de LOOka (100% confiables)
-// En backend/prisma/seed.js, cambia PLACEHOLDER por string vacío:
-const PLACEHOLDER = () => '';
 
 async function main() {
   const passwordHash = await bcrypt.hash('demo123', 10);
@@ -46,7 +37,7 @@ async function main() {
       description: 'Silla minimalista de madera clara con respaldo alto',
       category: 'silla',
       modelUrl: MODELS.silla,
-      thumbnailUrl: PLACEHOLDER('Silla\nNordica'),
+      thumbnailUrl: '',
       source: 'default',
     },
     {
@@ -54,7 +45,7 @@ async function main() {
       description: 'Mesa extensible para 6 personas con acabado premium',
       category: 'mesa',
       modelUrl: MODELS.mesa,
-      thumbnailUrl: PLACEHOLDER('Mesa\nde\nComedor'),
+      thumbnailUrl: '',
       source: 'default',
     },
     {
@@ -62,7 +53,7 @@ async function main() {
       description: 'Sofá de 3 plazas con tapizado premium y patas de madera',
       category: 'sofa',
       modelUrl: MODELS.sofa,
-      thumbnailUrl: PLACEHOLDER('Sofa\nModerno'),
+      thumbnailUrl: '',
       source: 'default',
     },
     {
@@ -70,7 +61,7 @@ async function main() {
       description: 'Cama con cabecera acolchada y base de madera sólida',
       category: 'cama',
       modelUrl: MODELS.cama,
-      thumbnailUrl: PLACEHOLDER('Cama\nMatrimonial'),
+      thumbnailUrl: '',
       source: 'default',
     },
     {
@@ -78,7 +69,7 @@ async function main() {
       description: 'Ropero de 2 puertas con espejo integrado y cajones',
       category: 'ropero',
       modelUrl: MODELS.ropero,
-      thumbnailUrl: PLACEHOLDER('Ropero\nModerno'),
+      thumbnailUrl: '',
       source: 'default',
     },
     {
@@ -86,7 +77,7 @@ async function main() {
       description: 'Estante de 5 niveles para libros y objetos decorativos',
       category: 'estante',
       modelUrl: MODELS.estante,
-      thumbnailUrl: PLACEHOLDER('Estante\nLibrero'),
+      thumbnailUrl: '',
       source: 'default',
     },
   ];
