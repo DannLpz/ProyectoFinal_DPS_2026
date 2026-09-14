@@ -39,28 +39,29 @@ export function ForYouScreen() {
   const [generated, setGenerated] = useState<Furniture | null>(null);
   const [error, setError] = useState('');
 
-  const handleGenerate = async () => {
-    if (prompt.trim().length < 3) {
-      setError('Describe tu mueble con al menos 3 caracteres');
-      return;
-    }
+const handleGenerate = async () => {
+  if (prompt.trim().length < 3) {
+    setError('Describe tu mueble con al menos 3 caracteres');
+    return;
+  }
 
-    setLoading(true);
-    setError('');
-    setGenerated(null);
+  setLoading(true);
+  setError('');
+  setGenerated(null);
 
-    try {
-      const result = await AIService.generateFurniture(prompt);
-      setGenerated(result);
-      // 👇 Esto hace que aparezca instantáneamente en "Mi espacio"
-      addGeneratedFurniture(result);
-    } catch (err) {
-      setError('No pudimos generar el mueble. Intenta de nuevo.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const result = await AIService.generateFurniture(prompt);
+    setGenerated(result);
+    addGeneratedFurniture(result);
+  } catch (err: any) {
+    const backendMessage =
+      err?.response?.data?.message ||
+      'No pudimos generar el mueble. Intenta de nuevo.';
+    setError(backendMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSuggestion = (text: string) => {
     setPrompt(text);

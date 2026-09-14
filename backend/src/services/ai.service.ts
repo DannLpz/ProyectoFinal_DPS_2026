@@ -1,103 +1,54 @@
 import { prisma } from '../config/prisma';
+import { classifyFurniturePrompt } from './nlp-filter.service';
 
-// Diccionario de palabras clave -> categoría
-// Si el prompt del usuario contiene alguna de estas palabras, sabemos qué categoría es.
-const KEYWORD_MAP: Record<string, string> = {
-  // Sillas
-  silla: 'silla',
-  asiento: 'silla',
-  banco: 'silla',
-  
-  // Mesas
-  mesa: 'mesa',
-  comedor: 'mesa',
-  
-  // Sofás
-  sofa: 'sofa',
-  sofá: 'sofa',
-  sillón: 'sofa',
-  sillon: 'sofa',
-  couch: 'sofa',
-  
-  // Camas
-  cama: 'cama',
-  dormitorio: 'cama',
-  
-  // Roperos
-  ropero: 'ropero',
-  armario: 'ropero',
-  closet: 'ropero',
-  
-  // Estantes
-  estante: 'estante',
-  librero: 'estante',
-  repisa: 'estante',
+// Nombres amigables por categoría
+const CATEGORY_NAMES: Record<string, string> = {
+  silla: 'Silla',
+  mesa: 'Mesa',
+  sofa: 'Sofá',
+  cama: 'Cama',
+  ropero: 'Ropero',
+  estante: 'Estante',
+  escritorio: 'Escritorio',
+  television: 'Mueble de TV',
+  organizador: 'Organizador',
+  zapatero: 'Zapatero',
 };
-
-const DEFAULT_CATEGORIES = ['silla', 'mesa', 'sofa', 'cama', 'ropero', 'estante'];
-
-function detectCategory(prompt: string): string {
-  const normalized = prompt.toLowerCase();
-  for (const [keyword, category] of Object.entries(KEYWORD_MAP)) {
-    if (normalized.includes(keyword)) {
-      return category;
-    }
-  }
-  // Si no detecta nada, elige una categoría aleatoria
-  return DEFAULT_CATEGORIES[Math.floor(Math.random() * DEFAULT_CATEGORIES.length)];
-}
-
-// Genera un nombre más "IA" basándose en el prompt
-function generateName(prompt: string, category: string): string {
-  const cleanPrompt = prompt.trim();
-  // Capitaliza la primera letra
-  const capitalized = cleanPrompt.charAt(0).toUpperCase() + cleanPrompt.slice(1);
-  return `${capitalized} (IA)`;
-}
-
-// Simula una pequeña espera para que se sienta "IA"
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export async function generateFurnitureFromPrompt(
   prompt: string,
   userId: string
 ) {
-  // 1. Simulamos el "pensamiento" de la IA
-  await wait(1500);
+  const classification = await classifyFurniturePrompt(prompt);
+  console.log('[AI] Clasificación:', classification);
 
-  // 2. Detectamos la categoría
-  const category = detectCategory(prompt);
-
-  // 3. Buscamos un mueble similar en la BD (el "truco")
-  const candidates = await prisma.furniture.findMany({
-    where: {
-      category,
-      source: 'default',
-    },
-  });
-
-  // Si no hay candidatos, usamos cualquier mueble
-  const pool = candidates.length > 0
-    ? candidates
-    : await prisma.furniture.findMany({ take: 1 });
-
-  if (pool.length === 0) {
-    throw new Error('No hay muebles base en la base de datos');
+  if (!classification.isFurniture) {
+    throw new Error(
+      'Esa descripción no parece ser un mueble. Intenta con: silla, mesa, sofá, cama, ropero o estante.'
+    );
   }
 
-  // 4. Elegimos uno al azar (o el primero)
-  const baseModel = pool[Math.floor(Math.random() * pool.length)];
+  const baseModel =
+    (await prisma.furniture.findFirst({
+      where: { category: classification.category, source: 'default' },
+    })) ||
+    (await prisma.furniture.findFirst({ where: { source: 'default' } }));
 
-  // 5. Creamos el "nuevo mueble generado por IA" reutilizando el modelo base
+  if (!baseModel) {
+    throw new Error('No hay modelos disponibles.');
+  }
+
+  // Nombre genérico según categoría, no el prompt completo
+  const categoryName = CATEGORY_NAMES[classification.category] || 'Mueble';
+  const displayName = `${categoryName} (IA)`;
+
   const generated = await prisma.furniture.create({
     data: {
-      name: generateName(prompt, category),
-      description: `Modelo generado por IA a partir de: "${prompt}"`,
-      category,
-      modelUrl: baseModel.modelUrl,       // 👈 Reutilizamos el modelo 3D
-      thumbnailUrl: baseModel.thumbnailUrl,
+      name: displayName,
+      description: `Generado por IA a partir de: "${prompt.trim()}"`,
+      category: classification.category,
+      modelUrl: baseModel.modelUrl,
+      thumbnailUrl: '',
       source: 'ai-generated',
       prompt,
       generatedById: userId,

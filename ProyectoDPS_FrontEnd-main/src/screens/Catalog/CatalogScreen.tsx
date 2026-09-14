@@ -10,7 +10,9 @@ import {
   View,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { MainTabParamList } from '../../navigation/types';
 import { theme } from '../../config/theme';
 import { FurnitureService } from '../../services/FurnitureService';
 import type { Furniture } from '../../models/Furniture';
@@ -35,12 +37,15 @@ const CATEGORY_META: Record<string, { emoji: string; bg: string; accent: string 
   estante: { emoji: '📚', bg: '#F0E8D8', accent: '#9A8040' },
 };
 
+type NavigationProp = BottomTabNavigationProp<MainTabParamList, 'Catalog'>;
+
 export function CatalogScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const [furniture, setFurniture] = useState<Furniture[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-
+  
   useEffect(() => {
     loadFurniture();
   }, []);
@@ -151,8 +156,9 @@ export function CatalogScreen() {
 
           return (
             <Pressable
-              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-            >
+  style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+  onPress={() => navigation.navigate('AR', { preselectedItemId: item.id })}
+>
               {/* Visual superior (emoji grande con fondo temático) */}
               <View style={[styles.cardVisual, { backgroundColor: meta.bg }]}>
                 <Text style={styles.cardEmoji}>{meta.emoji}</Text>

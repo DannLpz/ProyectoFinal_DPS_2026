@@ -12,7 +12,8 @@ import {
   View,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-
+import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
+import type { MainTabParamList } from '../../navigation/types';
 import { BASE_URL } from '../../services/apiClient';
 import { buildModelUrl } from '../../utils/buildModelUrl';
 import { theme } from '../../config/theme';
@@ -31,7 +32,11 @@ const CATEGORY_META: Record<string, { emoji: string; color: string }> = {
   generado: { emoji: '🤖', color: '#F4A4B8' },
 };
 
+type ARRouteProp = RouteProp<MainTabParamList, 'AR'>;
+
 export function ARScreen() {
+  const route = useRoute<ARRouteProp>();
+  const preselectedItemId = route.params?.preselectedItemId;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -42,6 +47,18 @@ export function ARScreen() {
   useEffect(() => {
     loadDefaultFurniture();
   }, []);
+
+  // Auto-abrir el item preseleccionado desde el catálogo
+useEffect(() => {
+  if (preselectedItemId && defaultFurniture.length > 0) {
+    const allFurniture = [...defaultFurniture, ...generatedFurniture];
+    const item = allFurniture.find((f) => f.id === preselectedItemId);
+    if (item) {
+      // Pequeño delay para que el componente esté montado
+      setTimeout(() => openARInBrowser(item), 300);
+    }
+  }
+}, [preselectedItemId, defaultFurniture, generatedFurniture]);
 
   const loadDefaultFurniture = async () => {
     try {

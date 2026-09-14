@@ -8,5 +8,5 @@ export type MainTabParamList = {
   Home: undefined;
   Catalog: undefined;
   ForYou: undefined;
-  AR: undefined;
+  AR: { preselectedItemId?: string } | undefined;   
 };
