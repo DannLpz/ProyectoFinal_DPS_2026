@@ -1,0 +1,213 @@
+==========================================================
+   LOOka - Guía de instalación (Pasos 2 al 5)
+==========================================================
+
+REQUISITOS PREVIOS (instalar antes de empezar):
+- Node.js v20 LTS         -> https://nodejs.org
+- Docker Desktop          -> https://www.docker.com/products/docker-desktop
+- VS Code                 -> https://code.visualstudio.com
+- Expo Go en el celular   -> App Store / Play Store
+
+Verificar que Node.js esté instalado abriendo PowerShell y ejecutando:
+   node --version
+Debe mostrar algo como: v20.x.x
+
+
+==========================================================
+PASO 2: ABRIR EL PROYECTO EN VS CODE
+==========================================================
+
+1. Abre VS Code.
+
+2. En el menú superior: File -> Open Folder...
+
+3. Selecciona la carpeta del proyecto (donde descomprimiste el ZIP).
+   Ejemplo: C:\Users\TuUsuario\Desktop\LOOka\ProyectoFinal_DPS_2026
+
+4. En el panel izquierdo verás la estructura del proyecto:
+   - backend/
+   - ProyectoDPS_FrontEnd-main/
+   - docker-compose.yml
+   - start.ps1
+
+   Si NO ves esos archivos, verifica que hayas seleccionado la carpeta
+   correcta (no una subcarpeta).
+
+
+==========================================================
+PASO 3: ABRIR UNA TERMINAL EN VS CODE
+==========================================================
+
+1. En VS Code, menú superior: Terminal -> New Terminal.
+
+2. O presiona el atajo: Ctrl + ñ  (Ctrl + tecla de la eñe)
+
+3. Aparecerá una terminal en la parte inferior de VS Code.
+
+4. Verifica que estás en la raíz del proyecto. La terminal debe
+   mostrar algo como:
+
+   PS C:\Users\TuUsuario\Desktop\LOOka\ProyectoFinal_DPS_2026>
+
+5. Si NO estás en la raíz, navega con:
+   cd "ruta\completa\al\proyecto"
+
+   Ejemplo:
+   cd "C:\Users\TuUsuario\Desktop\LOOka\ProyectoFinal_DPS_2026"
+
+
+==========================================================
+PASO 4: CONFIGURAR LOS ARCHIVOS .ENV
+==========================================================
+
+IMPORTANTE: El proyecto necesita dos archivos .env que NO vienen en
+GitHub por seguridad. Debes crearlos manualmente.
+
+----------------------------------------------------------
+4.1 Crear backend/.env
+----------------------------------------------------------
+
+En la terminal, escribe:
+
+   cd backend
+
+Luego crea el archivo:
+
+   New-Item .env -ItemType File
+
+Ahora abre el archivo desde VS Code (panel izquierdo):
+   - Expande backend/
+   - Haz clic en el archivo .env (está dentro de backend/)
+
+Pega el siguiente contenido EXACTAMENTE:
+
+   DATABASE_URL="postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public"
+   JWT_SECRET="looka_super_secret_key_cambiar_en_produccion"
+   PORT=3000
+
+Guarda con Ctrl + S.
+
+Vuelve a la raíz del proyecto en la terminal:
+
+   cd ..
+
+
+----------------------------------------------------------
+4.2 Crear .env en la raíz (OPCIONAL)
+----------------------------------------------------------
+
+Este archivo solo se necesita si vas a usar la IA con Gemini.
+Como actualmente la IA usa NLP local, PUEDES SALTARTE ESTE PASO.
+
+Si lo quieres crear de todas formas:
+
+Desde la raíz del proyecto, en la terminal:
+
+   New-Item .env -ItemType File
+
+Abre el archivo en VS Code y pega:
+
+   GEMINI_API_KEY=tu_api_key_aqui
+   POLY_PIZZA_KEY=tu_api_key_aqui
+
+Guarda con Ctrl + S.
+
+----------------------------------------------------------
+4.3 Verificar que los archivos estén bien creados
+----------------------------------------------------------
+
+Ejecuta en la terminal:
+
+   ls backend/.env
+   ls .env
+
+Deben aparecer ambos archivos. Si alguno no aparece, repite los
+pasos 4.1 o 4.2 según corresponda.
+
+
+==========================================================
+PASO 5: HABILITAR EJECUCIÓN DE SCRIPTS EN POWERSHELL
+==========================================================
+
+Este paso solo se hace UNA VEZ por computadora. Permite ejecutar
+el archivo start.ps1 sin que Windows lo bloquee.
+
+En la terminal de VS Code, ejecuta:
+
+   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+Cuando aparezca la pregunta de confirmación, escribe:
+
+   S
+
+Y presiona Enter.
+
+----------------------------------------------------------
+Verificar que quedó bien
+----------------------------------------------------------
+
+Ejecuta:
+
+   Get-ExecutionPolicy -Scope CurrentUser
+
+Debe mostrar: RemoteSigned
+
+----------------------------------------------------------
+Si NO funciona el paso anterior
+----------------------------------------------------------
+
+Abre PowerShell como Administrador:
+   1. Menú Inicio -> busca "PowerShell"
+   2. Clic derecho -> Ejecutar como administrador
+   3. Ejecuta el mismo comando:
+      Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+   4. Escribe "S" y Enter.
+
+
+==========================================================
+LISTO PARA EL SIGUIENTE PASO
+==========================================================
+
+Una vez completados los pasos 2 al 5, continúa con:
+
+PASO 6: Verificar que Docker Desktop esté corriendo.
+PASO 7: Ejecutar el script de inicio:  .\start.ps1
+PASO 8: Escanear el QR con Expo Go.
+PASO 9: Login con demo / demo123.
+
+
+==========================================================
+SOLUCIÓN DE PROBLEMAS COMUNES
+==========================================================
+
+ERROR: "no se puede cargar el archivo porque la ejecución de scripts
+está deshabilitada"
+   -> Ejecuta el PASO 5 de nuevo.
+
+ERROR: "New-Item: no se encuentra el parámetro..."
+   -> Asegúrate de estar en la carpeta correcta (backend para 4.1,
+      raíz para 4.2).
+
+ERROR: "Docker Desktop no está corriendo"
+   -> Abre Docker Desktop desde el menú Inicio y espera ~1 minuto
+      a que el ícono de la ballena aparezca en la barra de tareas.
+
+ERROR: El celular no se conecta
+   -> Verifica que la PC y el celular estén en la misma red WiFi.
+   -> Desactiva temporalmente el firewall de Windows.
+
+ERROR: Puerto 3000 o 8083 en uso
+   -> Ejecuta: docker-compose down
+   -> Luego:   docker-compose up -d
+
+
+==========================================================
+SOPORTE
+==========================================================
+
+Si encuentras algún error que no puedas resolver, envía una captura
+del mensaje completo y los logs del contenedor:
+
+   docker logs looka_backend --tail 30
+
+==========================================================
