@@ -16,6 +16,7 @@ import type { MainTabParamList } from '../../navigation/types';
 import { theme } from '../../config/theme';
 import { FurnitureService } from '../../services/FurnitureService';
 import type { Furniture } from '../../models/Furniture';
+import { useFavoritesStore } from '../../store/useFavoritesStore';
 
 const CATEGORIES = [
   { id: 'all', label: 'Todos', emoji: '✨' },
@@ -41,6 +42,7 @@ type NavigationProp = BottomTabNavigationProp<MainTabParamList, 'Catalog'>;
 
 export function CatalogScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { toggleFavorite, isFavorite } = useFavoritesStore();
   const [furniture, setFurniture] = useState<Furniture[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -152,6 +154,7 @@ export function CatalogScreen() {
             emoji: '🪑',
             bg: '#F0E8D8',
             accent: theme.colors.primary,
+            
           };
 
           return (
@@ -161,18 +164,35 @@ export function CatalogScreen() {
 >
               {/* Visual superior (emoji grande con fondo temático) */}
               <View style={[styles.cardVisual, { backgroundColor: meta.bg }]}>
-                <Text style={styles.cardEmoji}>{meta.emoji}</Text>
-                <View
-                  style={[
-                    styles.cardBadge,
-                    { backgroundColor: meta.accent },
-                  ]}
-                >
-                  <Text style={styles.cardBadgeText}>
-                    {item.category.toUpperCase()}
-                  </Text>
-                </View>
-              </View>
+  <Text style={styles.cardEmoji}>{meta.emoji}</Text>
+  
+  <View style={[styles.cardBadge, { backgroundColor: meta.accent }]}>
+    <Text style={styles.cardBadgeText}>
+      {item.category.toUpperCase()}
+    </Text>
+  </View>
+
+  {/* ❤️ BOTÓN DE FAVORITO */}
+  <Pressable
+    style={styles.favoriteButton}
+    onPress={(e) => {
+      e.stopPropagation?.();
+      toggleFavorite(item);
+    }}
+    hitSlop={10}
+  >
+    <Feather
+      name="heart"
+      size={18}
+      color={isFavorite(item.id) ? '#E11D48' : '#FFFFFF'}
+      style={{
+        textShadowColor: 'rgba(0,0,0,0.25)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
+      }}
+    />
+  </Pressable>
+</View>
 
               {/* Info inferior */}
               <View style={styles.cardBody}>
@@ -308,6 +328,17 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     ...theme.shadows.subtle,
   },
+  favoriteButton: {
+  position: 'absolute',
+  top: theme.spacing.sm,
+  right: theme.spacing.sm,
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: 'rgba(0, 0, 0, 0.25)',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
   cardPressed: {
     opacity: 0.92,
     transform: [{ scale: 0.98 }],

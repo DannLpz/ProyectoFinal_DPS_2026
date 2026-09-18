@@ -106,24 +106,32 @@ const handleGenerate = async () => {
           ))}
         </ScrollView>
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-            loading && styles.buttonDisabled,
-          ]}
-          onPress={handleGenerate}
-          disabled={loading}
-        >
-          {loading ? (
-            <View style={styles.loadingRow}>
-              <ActivityIndicator color={theme.colors.white} />
-              <Text style={styles.buttonText}>Generando con IA...</Text>
-            </View>
-          ) : (
-            <Text style={styles.buttonText}>✨ Generar con IA</Text>
-          )}
-        </Pressable>
+       <Pressable
+  style={({ pressed }) => [
+    styles.button,
+    pressed && styles.buttonPressed,
+    loading && styles.buttonDisabled,
+  ]}
+  onPress={handleGenerate}
+  disabled={loading}
+>
+  {loading ? (
+    <View style={styles.loadingRow}>
+      <ActivityIndicator color={theme.colors.white} />
+      <Text style={styles.buttonText}>Generando modelo 3D...</Text>
+    </View>
+  ) : (
+    <Text style={styles.buttonText}>✨ Generar con IA</Text>
+  )}
+</Pressable>
+
+{loading && (
+  <View style={styles.progressHint}>
+    <Text style={styles.progressHintText}>
+      La IA está diseñando tu mueble. Esto puede tardar entre 30 y 90 segundos.
+    </Text>
+  </View>
+)}
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -189,6 +197,20 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
   },
+  progressHint: {
+  backgroundColor: theme.colors.primarySoft,
+  paddingHorizontal: theme.spacing.md,
+  paddingVertical: theme.spacing.sm,
+  borderRadius: theme.radii.md,
+  marginBottom: theme.spacing.md,
+  marginTop: -theme.spacing.xs,
+},
+progressHintText: {
+  ...theme.typography.caption,
+  color: theme.colors.primaryDark,
+  textAlign: 'center',
+  lineHeight: 16,
+},
   suggestionsLabel: {
     ...theme.typography.caption,
     color: theme.colors.textMuted,

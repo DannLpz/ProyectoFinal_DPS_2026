@@ -87,25 +87,26 @@ useEffect(() => {
     }
   };
 
- const openARInBrowser = async (item: Furniture) => {
+const openARInBrowser = async (item: Furniture) => {
   const apiBase = BASE_URL.replace('/api', '');
   const modelUrl = buildModelUrl(item.modelUrl);
-  const url = `${apiBase}/ar/viewer?model=${encodeURIComponent(modelUrl)}&name=${encodeURIComponent(item.name)}`;
 
-  console.log('🔍 [DIAG] modelUrl construida:', modelUrl);
-  console.log('🔍 [DIAG] URL final del visor:', url);
+  const params = new URLSearchParams({
+    model: modelUrl,
+    name: item.name,
+    category: item.category || '',
+  });
+
+  const url = `${apiBase}/ar/viewer?${params.toString()}`;
 
   try {
     if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') {
-        window.open(url, '_blank');
-      }
+      if (typeof window !== 'undefined') window.open(url, '_blank');
     } else {
       await Linking.openURL(url);
     }
   } catch (err) {
-    console.warn('❌ [DIAG] No se pudo abrir la URL:', url, err);
-    Alert.alert('Error', 'No se pudo abrir el visor.');
+    console.warn('No se pudo abrir la URL:', url, err);
   }
 };
 

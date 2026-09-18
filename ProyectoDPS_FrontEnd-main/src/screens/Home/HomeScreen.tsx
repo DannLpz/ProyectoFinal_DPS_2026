@@ -14,31 +14,59 @@ import { useAuthStore } from '../../store/useAuthStore';
 import type { MenuOption } from '../../models/MenuOption';
 import { MENU_OPTIONS } from '../../utils/constants';
 import type { MainTabParamList } from '../../navigation/types';
-
+import { useFavoritesStore } from '../../store/useFavoritesStore';
 // Tipamos la navegación para que TypeScript sepa a qué pantallas podemos ir
 type NavigationProp = BottomTabNavigationProp<MainTabParamList, 'Home'>;
 
 export function HomeScreen() {
   const { horizontalPadding, menuCardWidth } = useResponsiveLayout();
   const navigation = useNavigation<NavigationProp>();
-  
+  const favorites = useFavoritesStore((s) => s.favorites);
+const favoritesCount = favorites.length;
   // Obtenemos el usuario y la función de logout directamente del store global
   const { user, logout } = useAuthStore();
 
   const firstName = user?.displayName?.split(' ')[0];
   const greetingName = firstName || user?.displayName || 'Invitado';
 
-  const handleOptionPress = useCallback((option: MenuOption) => {
-    // Usamos el título de la tarjeta para saber a dónde navegar
-    if (option.title === 'Explorar catálogo') {
-      navigation.navigate('Catalog');
-    } else if (option.title === 'Para ti') {
-      navigation.navigate('ForYou');
-    } else if (option.title === 'Ver en mi espacio') {
-      navigation.navigate('AR');
-    }
-  }, [navigation]);
+const handleOptionPress = useCallback(
+  (option: MenuOption) => {
+    console.log('[Home] Opción presionada:', option.id, option.title);
 
+    switch (option.id) {
+      case 'catalog':
+        navigation.navigate('Catalog');
+        break;
+
+      case 'recommendations':     
+        navigation.navigate('ForYou');
+        break;
+
+      case 'augmented-reality':   
+        navigation.navigate('AR');
+        break;
+case 'cart':
+  navigation.getParent()?.navigate('Cart' as never);
+  break;
+      case 'favorites':
+        navigation.getParent()?.navigate('Favorites' as never);
+        break;
+
+      case 'publish':
+        navigation.getParent()?.navigate('Publish' as never);
+        break;
+
+      case 'cart':
+        // Pendiente: pantalla de carrito
+        console.warn('[Home] Carrito aún no implementado');
+        break;
+
+      default:
+        console.warn('[Home] Opción sin handler:', option.id);
+    }
+  },
+  [navigation]
+);
   return (
     <ScreenContainer
       backgroundColor={theme.colors.primary}
@@ -110,15 +138,6 @@ export function HomeScreen() {
     <Text style={styles.heroFooterText}>Explora el catálogo ahora</Text>
   </View>
 </View>
-
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionHeaderCopy}>
-              <Text style={styles.sectionTitle}>Explora las opciones</Text>
-              <Text style={styles.sectionSubtitle}>
-                Selecciona la opción con la que quieres iniciar
-              </Text>
-            </View>
-          </View>
 
           <View style={styles.menuGrid}>
             {MENU_OPTIONS.map((option) => (

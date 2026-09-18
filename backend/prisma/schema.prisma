@@ -18,6 +18,7 @@ model User {
   updatedAt    DateTime @updatedAt
 
   generatedFurniture Furniture[] @relation("UserGeneratedFurniture")
+  listings Listing[] @relation("UserListings")
 }
 
 model Furniture {
@@ -31,7 +32,23 @@ model Furniture {
   prompt        String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  
+  listings Listing[] 
   generatedById String?
   generatedBy   User?    @relation("UserGeneratedFurniture", fields: [generatedById], references: [id])
+}
+
+model Listing {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  currency    String   @default("USD")
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  furnitureId String
+  furniture   Furniture @relation(fields: [furnitureId], references: [id], onDelete: Cascade)
+  sellerId    String
+  seller      User      @relation("UserListings", fields: [sellerId], references: [id])
 }

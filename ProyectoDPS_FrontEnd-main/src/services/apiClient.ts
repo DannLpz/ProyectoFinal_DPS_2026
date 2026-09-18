@@ -44,7 +44,7 @@ console.log('[API] BASE_URL detectada:', BASE_URL);
 
 export const apiClient = axios.create({
   baseURL: getApiBaseUrl(),
-  timeout: 90000,  // 90 segundos (Forge puede tardar 20-40s)
+  timeout: 120000,  // 120 segundos para permitir la generación 3D con Forge
   headers: { 'Content-Type': 'application/json' },
 });
 
