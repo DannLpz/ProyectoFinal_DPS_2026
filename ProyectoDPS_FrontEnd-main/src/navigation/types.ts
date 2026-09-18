@@ -4,7 +4,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   Publish: { preselectedItemId?: string } | undefined;
   Favorites: undefined;
-  Cart: undefined;  
+  Cart: undefined;
 };
 
 export type MainTabParamList = {
