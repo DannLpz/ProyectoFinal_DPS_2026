@@ -5,26 +5,22 @@ import { useAuthStore } from '../store/useAuthStore';
 
 /**
  * Detecta la URL del backend automáticamente según la plataforma:
+ *  - WEB: usa el hostname del navegador.
+ *  - MÓVIL: usa la IP que Expo asignó a la PC.
  *
- * - En WEB: usa el hostname del navegador (localhost o la IP de la PC).
- * - En MÓVIL (Expo Go): usa la IP que Expo le dio al teléfono.
- *
- * Resultado: funciona en cualquier red sin tocar configuración.
+ * No requiere configuración manual.
  */
 function getApiBaseUrl(): string {
-  // 1. WEB: el navegador ya sabe desde qué host se está sirviendo.
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined' && window.location?.hostname) {
-      const hostname = window.location.hostname; // "localhost" o "192.168.x.x"
-      return `http://${hostname}:3000/api`;
+      return `http://${window.location.hostname}:3000/api`;
     }
     return 'http://localhost:3000/api';
   }
 
-  // 2. MÓVIL: Expo nos dice la IP de la PC que sirve el bundle.
   const hostUri =
     Constants.expoConfig?.hostUri ||
-    // @ts-ignore - fallback para versiones antiguas
+    // @ts-ignore - fallback versiones antiguas
     Constants.expoGoConfig?.debuggerHost ||
     // @ts-ignore
     Constants.manifest2?.extra?.expoGo?.debuggerHost;
@@ -34,20 +30,23 @@ function getApiBaseUrl(): string {
     return `http://${ip}:3000/api`;
   }
 
-  // 3. Fallback improbable
   return 'http://localhost:3000/api';
 }
 
+// Se calcula UNA SOLA VEZ al cargar el módulo
 export const BASE_URL = getApiBaseUrl();
 
-console.log('[API] BASE_URL detectada:', BASE_URL);
+if (__DEV__) {
+  console.log('[API] BASE_URL detectada:', BASE_URL);
+}
 
 export const apiClient = axios.create({
-  baseURL: getApiBaseUrl(),
-  timeout: 120000,  // 120 segundos para permitir la generación 3D con Forge
+  baseURL: BASE_URL,
+  timeout: 120000,
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Adjunta el token JWT en cada petición si el usuario está autenticado
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;

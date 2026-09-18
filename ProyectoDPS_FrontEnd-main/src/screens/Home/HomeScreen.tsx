@@ -31,36 +31,25 @@ const favoritesCount = favorites.length;
 
 const handleOptionPress = useCallback(
   (option: MenuOption) => {
-    console.log('[Home] Opción presionada:', option.id, option.title);
-
     switch (option.id) {
       case 'catalog':
         navigation.navigate('Catalog');
         break;
-
-      case 'recommendations':     
+      case 'recommendations':
         navigation.navigate('ForYou');
         break;
-
-      case 'augmented-reality':   
+      case 'augmented-reality':
         navigation.navigate('AR');
         break;
-case 'cart':
-  navigation.getParent()?.navigate('Cart' as never);
-  break;
       case 'favorites':
         navigation.getParent()?.navigate('Favorites' as never);
         break;
-
+      case 'cart':
+        navigation.getParent()?.navigate('Cart' as never);
+        break;
       case 'publish':
         navigation.getParent()?.navigate('Publish' as never);
         break;
-
-      case 'cart':
-        // Pendiente: pantalla de carrito
-        console.warn('[Home] Carrito aún no implementado');
-        break;
-
       default:
         console.warn('[Home] Opción sin handler:', option.id);
     }

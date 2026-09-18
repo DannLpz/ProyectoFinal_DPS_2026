@@ -1,9 +1,12 @@
 import axios from 'axios';
 import { apiClient } from './apiClient';
 import type { AuthCredentials, AuthResult } from '../models/AuthResult';
-import type { AuthService } from './AuthService';
 
-export class RealAuthService implements AuthService {
+/**
+ * Servicio de autenticación real contra el backend LOOka.
+ * Hace POST /api/auth/login y devuelve el token JWT + datos del usuario.
+ */
+export class RealAuthService {
   async authenticate(credentials: AuthCredentials): Promise<AuthResult> {
     try {
       const response = await apiClient.post('/auth/login', {
@@ -36,4 +39,4 @@ export class RealAuthService implements AuthService {
       };
     }
   }
-}   
+}

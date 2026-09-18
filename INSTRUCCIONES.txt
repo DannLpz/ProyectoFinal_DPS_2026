@@ -1,7 +1,7 @@
 ==========================================================
    LOOka · Guía de Instalación y Ejecución
 ==========================================================
-Versión: 1.0
+Versión: 1.1
 Última actualización: Septiembre 2026
 ==========================================================
 
@@ -12,10 +12,13 @@ Versión: 1.0
 2. Descarga del proyecto
 3. Configuración inicial
 4. Levantar el sistema con Docker
-5. Probar la app (3 formas)
-6. Comandos del día a día
-7. Solución de problemas
-8. Estructura del proyecto
+5. Probar la app (4 formas)
+6. Compartir con un compañero
+7. Comandos del día a día
+8. Solución de problemas
+9. Estructura del proyecto
+10. Funcionalidades de la app
+11. Soporte
 
 
 ==========================================================
@@ -70,6 +73,7 @@ Verifica que dentro de la carpeta estén:
    - ProyectoDPS_FrontEnd-main/
    - docker-compose.yml
    - start.ps1
+   - INSTRUCCIONES.txt (este archivo)
 
 
 ==========================================================
@@ -80,7 +84,19 @@ El proyecto necesita 2 archivos .env (variables de entorno).
 NO vienen en GitHub por seguridad, hay que crearlos manualmente.
 
 ----------------------------------------------------------
-3.1 Crear backend/.env
+3.1 OPCIÓN RÁPIDA: Copiar desde .env.example
+----------------------------------------------------------
+El proyecto incluye archivos .env.example como plantilla.
+Puedes copiarlos y renombrarlos con estos comandos:
+
+   Copy-Item backend\.env.example backend\.env
+   Copy-Item .env.example .env
+
+Después editas ambos .env y reemplazas los valores con
+tus credenciales reales (ver secciones 3.3 y 3.4).
+
+----------------------------------------------------------
+3.2 OPCIÓN MANUAL: Crear backend/.env
 ----------------------------------------------------------
 En VS Code, dentro de la carpeta backend/ crea un archivo
 llamado .env (sin extensión) y pega EXACTAMENTE esto:
@@ -94,7 +110,7 @@ llamado .env (sin extensión) y pega EXACTAMENTE esto:
 Guarda con Ctrl + S.
 
 ----------------------------------------------------------
-3.2 Crear .env en la raíz del proyecto
+3.3 Crear .env en la raíz del proyecto
 ----------------------------------------------------------
 En la raíz (al mismo nivel que docker-compose.yml) crea otro
 archivo .env con:
@@ -102,8 +118,10 @@ archivo .env con:
    GEMINI_API_KEY=tu_key_de_gemini_aqui
    FORGE_TIER=standard
 
+Guarda con Ctrl + S.
+
 ----------------------------------------------------------
-3.3 Obtener tu API Key de Gemini (gratis)
+3.4 Obtener tu API Key de Gemini (gratis)
 ----------------------------------------------------------
 1. Ve a: https://aistudio.google.com/apikey
 2. Inicia sesión con tu cuenta de Google
@@ -112,9 +130,30 @@ archivo .env con:
 5. Copia la key completa (empieza con "AQ." o "AIza...")
 6. Pégala en ambos .env
 
-IMPORTANTE: El tier gratuito tiene límite de 20 peticiones/día.
-Si se agota, la app usa automáticamente un clasificador local
-de respaldo (el sistema nunca se rompe).
+IMPORTANTE: El tier gratuito tiene un límite diario que puede
+variar según la demanda global de Google. Si se agota, la app
+usa automáticamente un clasificador local de respaldo, así que
+las funciones siguen operativas aunque no haya cuota disponible.
+
+----------------------------------------------------------
+3.5 Verificar que .env NO se suba a Git
+----------------------------------------------------------
+Los archivos .env NUNCA deben subirse al repositorio.
+Verifica que el archivo .gitignore (en la raíz) contenga:
+
+   .env
+   */.env
+   **/.env
+
+Puedes verificar con:
+
+   git check-ignore -v backend/.env
+   git check-ignore -v .env
+
+Ambos comandos deben responder mostrando la línea del .gitignore.
+
+Si por accidente subes tu GEMINI_API_KEY, regenérala
+inmediatamente en: https://aistudio.google.com/apikey
 
 
 ==========================================================
@@ -126,6 +165,11 @@ de respaldo (el sistema nunca se rompe).
 ----------------------------------------------------------
 Abre Docker Desktop desde el menú Inicio. Espera a que el
 ícono de la ballena 🐳 diga "Docker Desktop is running".
+
+Verifica desde PowerShell:
+   docker ps
+
+Debe responder sin errores (aunque la lista esté vacía).
 
 ----------------------------------------------------------
 4.2 Habilitar ejecución de scripts (solo primera vez)
@@ -169,7 +213,7 @@ Al final verás:
 
 
 ==========================================================
-5. PROBAR LA APP (3 formas)
+5. PROBAR LA APP (4 formas)
 ==========================================================
 
 ----------------------------------------------------------
@@ -215,9 +259,48 @@ Usa las mismas credenciales: demo / demo123
 Nota: el frontend detecta automáticamente la IP del backend,
 no hay que configurar nada.
 
+----------------------------------------------------------
+5.4 Verificar que todo funciona (checks rápidos)
+----------------------------------------------------------
+Abre en el navegador del PC:
+
+   http://localhost:3000/api/health
+   → Debe mostrar: {"status":"ok","message":"LOOka backend funcionando 🚀"}
+
+   http://localhost:3000/api/furniture/default
+   → Debe mostrar un array con 6 muebles predeterminados
+
+   http://localhost:3000/ar/viewer?model=/models/silla.glb&name=Test
+   → Debe mostrar la silla 3D girando con un botón de AR
+
 
 ==========================================================
-6. COMANDOS DEL DÍA A DÍA
+6. COMPARTIR CON UN COMPAÑERO (misma red WiFi)
+==========================================================
+
+1. Ambos dispositivos deben estar en la misma red WiFi.
+
+2. El dueño del backend ejecuta en PowerShell:
+   ipconfig
+   Y busca "Dirección IPv4" (ejemplo: 192.168.1.9).
+
+3. El compañero desde su navegador visita:
+   http://192.168.1.9:8083
+
+4. O desde Expo Go toca "Enter URL manually" e ingresa:
+   exp://192.168.1.9:8081
+
+Nota: la app detecta la IP del backend automáticamente, por lo
+que no hay que configurar nada extra.
+
+IMPORTANTE: Si el compañero está en OTRA red (WiFi distinto o
+datos móviles), la conexión NO funcionará porque el backend
+corre localmente en tu PC. En ese caso, se necesita exponer
+el backend a internet (Ngrok, Railway, etc.).
+
+
+==========================================================
+7. COMANDOS DEL DÍA A DÍA
 ==========================================================
 
 Arrancar todo:
@@ -252,7 +335,7 @@ Actualizar dependencias tras un "git pull":
 
 
 ==========================================================
-7. SOLUCIÓN DE PROBLEMAS
+8. SOLUCIÓN DE PROBLEMAS
 ==========================================================
 
 [ERROR] "Docker Desktop no está corriendo"
@@ -281,10 +364,15 @@ Actualizar dependencias tras un "git pull":
    Debe mostrar: {"status":"ok",...}
 
 [ERROR] "Cuota de Gemini agotada" o "429"
-→ El tier gratuito tiene 20 peticiones por día.
+→ El tier gratuito tiene un límite diario variable.
 → Espera 24h o usa una API key diferente.
 → La app usa automáticamente un clasificador local de respaldo,
   así que la demo funcionará igual.
+
+[ERROR] "The table public.Listing does not exist"
+→ La migración de base de datos no se aplicó. Solución:
+     docker exec -it looka_backend npx prisma db push
+     docker-compose restart backend
 
 [ERROR] La cámara AR no se activa en iPhone
 → Debe ser iPhone 6s o superior con iOS 12+
@@ -297,9 +385,15 @@ Actualizar dependencias tras un "git pull":
 → Escribe la URL que aparece arriba del QR:
      exp://TU_IP:8081
 
+[ERROR] Los modelos 3D no cargan
+→ Verifica que el backend esté corriendo: docker ps
+→ Prueba en el navegador:
+     http://localhost:3000/models/silla.glb
+   Debe descargar el archivo .glb
+
 
 ==========================================================
-8. ESTRUCTURA DEL PROYECTO
+9. ESTRUCTURA DEL PROYECTO
 ==========================================================
 
 ProyectoV3/
@@ -313,6 +407,7 @@ ProyectoV3/
 │   │   ├── middlewares/          Autenticación JWT
 │   │   ├── routes/               Definición de rutas
 │   │   └── services/             Lógica de negocio (IA, listings, etc.)
+│   ├── .env.example              Plantilla de variables de entorno
 │   ├── Dockerfile
 │   └── package.json
 │
@@ -327,10 +422,13 @@ ProyectoV3/
 │   │   ├── services/             Consumo de API
 │   │   ├── store/                Estado global (Zustand)
 │   │   └── utils/                Utilidades
+│   ├── .env.example              Plantilla de variables de entorno
 │   ├── Dockerfile
 │   └── package.json
 │
 ├── k8s/                          Manifiestos de Kubernetes
+├── .env.example                  Plantilla de variables de entorno raíz
+├── .gitignore                    Archivos ignorados por Git
 ├── docker-compose.yml            Orquestación de contenedores
 ├── start.ps1                     Script de inicio automático
 ├── INSTRUCCIONES.txt             Este archivo
@@ -338,7 +436,7 @@ ProyectoV3/
 
 
 ==========================================================
-9. FUNCIONALIDADES DE LA APP
+10. FUNCIONALIDADES DE LA APP
 ==========================================================
 
 Una vez dentro, podrás:
@@ -347,27 +445,35 @@ Una vez dentro, podrás:
    Credenciales de prueba: demo / demo123
 
 🛍️ Catálogo
-   6 muebles predeterminados con filtros por categoría
+   6 muebles predeterminados con filtros por categoría.
+   Cada mueble tiene un botón de corazón para guardarlo en
+   favoritos.
 
 🤖 Para ti (IA)
    Describe un mueble en lenguaje natural ("una silla azul")
-   y la IA genera un modelo 3D único con Google Gemini + Forge
+   y la IA genera un modelo 3D único con Google Gemini + Forge.
+   Filtra automáticamente peticiones que no sean muebles
+   (ej: "un carro" es rechazado).
 
 ❤️ Favoritos
-   Guarda muebles del catálogo tocando el corazón
+   Guarda muebles del catálogo tocando el corazón.
+   Los favoritos persisten durante la sesión.
 
 📷 Ver en mi espacio (AR)
-   Proyecta los muebles en tu entorno real con la cámara
+   Proyecta los muebles en tu entorno real con la cámara del
+   celular usando AR Quick Look (iOS) o Scene Viewer (Android).
 
 💰 Publicar mueble
-   Ponle precio y descripción a cualquier mueble
+   Ponle precio, título y descripción a cualquier mueble del
+   catálogo o generado por IA.
 
 🛒 Mi carrito
-   Agrega muebles publicados y simula una compra
+   Agrega muebles publicados, revisa el total y simula una
+   compra.
 
 
 ==========================================================
-10. SOPORTE
+11. SOPORTE
 ==========================================================
 
 Si encuentras un error que no puedas resolver:
