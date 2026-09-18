@@ -1,0 +1,386 @@
+==========================================================
+   LOOka · Guía de Instalación y Ejecución
+==========================================================
+Versión: 1.0
+Última actualización: Septiembre 2026
+==========================================================
+
+
+ÍNDICE
+-------
+1. Requisitos previos
+2. Descarga del proyecto
+3. Configuración inicial
+4. Levantar el sistema con Docker
+5. Probar la app (3 formas)
+6. Comandos del día a día
+7. Solución de problemas
+8. Estructura del proyecto
+
+
+==========================================================
+1. REQUISITOS PREVIOS (instalar UNA VEZ por PC)
+==========================================================
+
+Antes de empezar, asegúrate de tener instalado:
+
+[ ] Node.js v20 LTS
+    Descarga: https://nodejs.org
+    Verificar: node --version   (debe decir v20.x.x o superior)
+
+[ ] Docker Desktop
+    Descarga: https://www.docker.com/products/docker-desktop
+    IMPORTANTE: después de instalar, ábrelo y espera a que el ícono
+    de la ballena 🐳 aparezca en la barra de tareas con el mensaje
+    "Docker Desktop is running".
+
+[ ] Git
+    Descarga: https://git-scm.com/downloads
+    Verificar: git --version
+
+[ ] VS Code (recomendado)
+    Descarga: https://code.visualstudio.com
+
+[ ] Expo Go (en el celular)
+    - iPhone: App Store → buscar "Expo Go"
+    - Android: Play Store → buscar "Expo Go"
+
+
+==========================================================
+2. DESCARGA DEL PROYECTO
+==========================================================
+
+OPCIÓN A · Descarga directa (más fácil)
+---------------------------------------
+1. Ve a: https://github.com/DannLpz/ProyectoFinal_DPS_2026
+2. Botón verde "Code" → "Download ZIP"
+3. Descomprime el ZIP en una carpeta, por ejemplo:
+   C:\Users\TuUsuario\Desktop\LOOka\
+
+OPCIÓN B · Git clone
+--------------------
+Abre PowerShell y ejecuta:
+
+   cd "$env:USERPROFILE\Desktop"
+   git clone https://github.com/DannLpz/ProyectoFinal_DPS_2026.git
+   cd ProyectoFinal_DPS_2026
+
+Verifica que dentro de la carpeta estén:
+   - backend/
+   - ProyectoDPS_FrontEnd-main/
+   - docker-compose.yml
+   - start.ps1
+
+
+==========================================================
+3. CONFIGURACIÓN INICIAL
+==========================================================
+
+El proyecto necesita 2 archivos .env (variables de entorno).
+NO vienen en GitHub por seguridad, hay que crearlos manualmente.
+
+----------------------------------------------------------
+3.1 Crear backend/.env
+----------------------------------------------------------
+En VS Code, dentro de la carpeta backend/ crea un archivo
+llamado .env (sin extensión) y pega EXACTAMENTE esto:
+
+   DATABASE_URL="postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public"
+   JWT_SECRET="looka_super_secret_key_cambiar_en_produccion"
+   PORT=3000
+   GEMINI_API_KEY=tu_key_de_gemini_aqui
+   FORGE_TIER=standard
+
+Guarda con Ctrl + S.
+
+----------------------------------------------------------
+3.2 Crear .env en la raíz del proyecto
+----------------------------------------------------------
+En la raíz (al mismo nivel que docker-compose.yml) crea otro
+archivo .env con:
+
+   GEMINI_API_KEY=tu_key_de_gemini_aqui
+   FORGE_TIER=standard
+
+----------------------------------------------------------
+3.3 Obtener tu API Key de Gemini (gratis)
+----------------------------------------------------------
+1. Ve a: https://aistudio.google.com/apikey
+2. Inicia sesión con tu cuenta de Google
+3. Clic en "Create API key"
+4. Elige "Create API key in new project"
+5. Copia la key completa (empieza con "AQ." o "AIza...")
+6. Pégala en ambos .env
+
+IMPORTANTE: El tier gratuito tiene límite de 20 peticiones/día.
+Si se agota, la app usa automáticamente un clasificador local
+de respaldo (el sistema nunca se rompe).
+
+
+==========================================================
+4. LEVANTAR EL SISTEMA CON DOCKER
+==========================================================
+
+----------------------------------------------------------
+4.1 Verificar que Docker esté corriendo
+----------------------------------------------------------
+Abre Docker Desktop desde el menú Inicio. Espera a que el
+ícono de la ballena 🐳 diga "Docker Desktop is running".
+
+----------------------------------------------------------
+4.2 Habilitar ejecución de scripts (solo primera vez)
+----------------------------------------------------------
+Abre PowerShell y ejecuta:
+
+   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+Cuando pregunte, escribe: S
+Y presiona Enter.
+
+----------------------------------------------------------
+4.3 Ejecutar el script de inicio
+----------------------------------------------------------
+En PowerShell, navega a la raíz del proyecto:
+
+   cd "ruta\completa\al\proyecto"
+
+Y ejecuta:
+
+   .\start.ps1
+
+El script hace AUTOMÁTICAMENTE:
+   1. Verifica que Docker esté corriendo
+   2. Instala dependencias del frontend (primera vez: ~2 min)
+   3. Levanta los 3 contenedores (PostgreSQL, backend, frontend)
+   4. Ejecuta el seed (crea usuario demo + 6 muebles)
+   5. Arranca Expo y muestra el QR
+
+Al final verás:
+
+   =========================================
+      LOOka listo para usar
+   =========================================
+
+     Backend:      http://localhost:3000/api/health
+     Frontend Web: http://localhost:8083
+
+     Escanea el QR con Expo Go en tu celular.
+     Usuario demo: demo / demo123
+
+
+==========================================================
+5. PROBAR LA APP (3 formas)
+==========================================================
+
+----------------------------------------------------------
+5.1 En el celular (RECOMENDADO)
+----------------------------------------------------------
+Requisitos:
+   - El celular y la PC deben estar en la MISMA red WiFi
+   - Tener Expo Go instalado
+
+Pasos:
+   1. Abre Expo Go
+   2. Toca "Scan QR code"
+   3. Escanea el código que aparece en la terminal de Expo
+   4. La app se cargará automáticamente
+
+Credenciales de prueba:
+   Usuario:  demo
+   Password: demo123
+
+----------------------------------------------------------
+5.2 En el navegador del PC (versión web)
+----------------------------------------------------------
+Abre Chrome o Edge y visita:
+
+   http://localhost:8083
+
+Usa las mismas credenciales: demo / demo123
+
+----------------------------------------------------------
+5.3 Desde otro dispositivo usando la IP de la PC
+----------------------------------------------------------
+Útil para mostrar la app en otra PC o tablet.
+
+1. Averigua tu IP local:
+   Abre PowerShell y ejecuta: ipconfig
+   Busca "Dirección IPv4" (ejemplo: 192.168.1.9)
+
+2. Desde el otro dispositivo abre el navegador:
+   http://TU_IP:8083
+
+   Ejemplo: http://192.168.1.9:8083
+
+Nota: el frontend detecta automáticamente la IP del backend,
+no hay que configurar nada.
+
+
+==========================================================
+6. COMANDOS DEL DÍA A DÍA
+==========================================================
+
+Arrancar todo:
+   cd "ruta\al\proyecto"
+   .\start.ps1
+
+Detener todo:
+   Ctrl + C   (en la terminal de Expo)
+   docker-compose stop
+
+Ver estado de los contenedores:
+   docker ps
+
+Ver logs del backend:
+   docker logs looka_backend -f
+
+Reiniciar solo el backend:
+   docker-compose restart backend
+
+Reiniciar todo:
+   docker-compose down
+   docker-compose up -d
+
+Actualizar dependencias tras un "git pull":
+   cd backend
+   npm install
+   cd ..\ProyectoDPS_FrontEnd-main
+   npm install
+   cd ..
+   docker-compose build --no-cache
+   docker-compose up -d
+
+
+==========================================================
+7. SOLUCIÓN DE PROBLEMAS
+==========================================================
+
+[ERROR] "Docker Desktop no está corriendo"
+→ Abre Docker Desktop, espera ~1 minuto y vuelve a ejecutar.
+
+[ERROR] "El puerto 3000 ya está en uso"
+→ Otro servicio está usando el puerto. Solución:
+     docker-compose down
+     docker-compose up -d
+
+[ERROR] "La ejecución de scripts está deshabilitada"
+→ Ejecuta en PowerShell:
+     Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+   Escribe S y Enter.
+
+[ERROR] El celular no conecta con la app
+→ Verifica que PC y celular estén en la MISMA red WiFi.
+→ Ejecuta PowerShell como Administrador y corre:
+     New-NetFirewallRule -DisplayName "LOOka 3000" -Direction Inbound -LocalPort 3000 -Protocol TCP -Action Allow
+     New-NetFirewallRule -DisplayName "LOOka 8083" -Direction Inbound -LocalPort 8083 -Protocol TCP -Action Allow
+
+[ERROR] "No pudimos conectar con el servidor" en la app
+→ Verifica que el backend esté corriendo: docker ps
+→ Verifica que en el navegador del PC funcione:
+     http://localhost:3000/api/health
+   Debe mostrar: {"status":"ok",...}
+
+[ERROR] "Cuota de Gemini agotada" o "429"
+→ El tier gratuito tiene 20 peticiones por día.
+→ Espera 24h o usa una API key diferente.
+→ La app usa automáticamente un clasificador local de respaldo,
+  así que la demo funcionará igual.
+
+[ERROR] La cámara AR no se activa en iPhone
+→ Debe ser iPhone 6s o superior con iOS 12+
+→ Abre Safari (NO Chrome, no funciona)
+→ Ajustes → Safari → Realidad Aumentada → "Preguntar"
+→ Cierra Safari por completo y vuelve a intentar
+
+[ERROR] El QR de Expo no funciona
+→ En Expo Go toca "Enter URL manually"
+→ Escribe la URL que aparece arriba del QR:
+     exp://TU_IP:8081
+
+
+==========================================================
+8. ESTRUCTURA DEL PROYECTO
+==========================================================
+
+ProyectoV3/
+│
+├── backend/                      API REST (Node.js + Express + TypeScript)
+│   ├── prisma/                   Esquema de base de datos y migraciones
+│   ├── public/models/            Modelos 3D (.glb) del catálogo
+│   ├── src/
+│   │   ├── config/               Configuración de Prisma
+│   │   ├── controllers/          Lógica de endpoints
+│   │   ├── middlewares/          Autenticación JWT
+│   │   ├── routes/               Definición de rutas
+│   │   └── services/             Lógica de negocio (IA, listings, etc.)
+│   ├── Dockerfile
+│   └── package.json
+│
+├── ProyectoDPS_FrontEnd-main/    App móvil (React Native + Expo)
+│   ├── src/
+│   │   ├── components/           Componentes reutilizables
+│   │   ├── config/               Tema y configuración
+│   │   ├── hooks/                Hooks personalizados
+│   │   ├── models/               Interfaces TypeScript
+│   │   ├── navigation/           React Navigation
+│   │   ├── screens/              Pantallas de la app
+│   │   ├── services/             Consumo de API
+│   │   ├── store/                Estado global (Zustand)
+│   │   └── utils/                Utilidades
+│   ├── Dockerfile
+│   └── package.json
+│
+├── k8s/                          Manifiestos de Kubernetes
+├── docker-compose.yml            Orquestación de contenedores
+├── start.ps1                     Script de inicio automático
+├── INSTRUCCIONES.txt             Este archivo
+└── README.md                     Documentación principal
+
+
+==========================================================
+9. FUNCIONALIDADES DE LA APP
+==========================================================
+
+Una vez dentro, podrás:
+
+📱 Login
+   Credenciales de prueba: demo / demo123
+
+🛍️ Catálogo
+   6 muebles predeterminados con filtros por categoría
+
+🤖 Para ti (IA)
+   Describe un mueble en lenguaje natural ("una silla azul")
+   y la IA genera un modelo 3D único con Google Gemini + Forge
+
+❤️ Favoritos
+   Guarda muebles del catálogo tocando el corazón
+
+📷 Ver en mi espacio (AR)
+   Proyecta los muebles en tu entorno real con la cámara
+
+💰 Publicar mueble
+   Ponle precio y descripción a cualquier mueble
+
+🛒 Mi carrito
+   Agrega muebles publicados y simula una compra
+
+
+==========================================================
+10. SOPORTE
+==========================================================
+
+Si encuentras un error que no puedas resolver:
+
+1. Verifica los logs del backend:
+   docker logs looka_backend --tail 50
+
+2. Revisa si los contenedores están arriba:
+   docker ps
+
+3. Adjunta una captura del error completo y los logs
+   al canal del equipo.
+
+==========================================================
+Fin del documento
+==========================================================
