@@ -22,14 +22,14 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+    env_file:
+      - .env                    # 👈 Lee TODO desde la raíz
     environment:
       DATABASE_URL: postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public
-      JWT_SECRET: looka_super_secret_key_cambiar_en_produccion
-      PORT: 3000
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      FORGE_TIER: ${FORGE_TIER}
     ports:
       - '3000:3000'
+    volumes:
+      - ./backend/public/models:/app/public/models
     networks:
       - looka_network
 

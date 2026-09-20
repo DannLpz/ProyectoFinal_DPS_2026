@@ -42,7 +42,7 @@ if (__DEV__) {
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 120000,
+  timeout: 300000, // 5 minutos
   headers: { 'Content-Type': 'application/json' },
 });
 

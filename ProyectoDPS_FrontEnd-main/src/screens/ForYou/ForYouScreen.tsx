@@ -54,11 +54,13 @@ const handleGenerate = async () => {
     setGenerated(result);
     addGeneratedFurniture(result);
   } catch (err: any) {
-    const backendMessage =
-      err?.response?.data?.message ||
-      'No pudimos generar el mueble. Intenta de nuevo.';
-    setError(backendMessage);
-  } finally {
+  let backendMessage =
+    err?.response?.data?.message ||
+    (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')
+      ? 'La conexión tardó más de lo esperado. Revisa la pestaña AR por si el modelo se guardó.'
+      : 'No pudimos generar el mueble. Intenta de nuevo.');
+  setError(backendMessage);
+}finally {
     setLoading(false);
   }
 };
@@ -128,7 +130,7 @@ const handleGenerate = async () => {
 {loading && (
   <View style={styles.progressHint}>
     <Text style={styles.progressHintText}>
-      La IA está diseñando tu mueble. Esto puede tardar entre 30 y 90 segundos.
+      ✨ Tripo3D está diseñando tu mueble. Esto tarda entre 1.5 y 2.5 minutos.
     </Text>
   </View>
 )}

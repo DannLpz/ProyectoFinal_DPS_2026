@@ -1,7 +1,7 @@
 ==========================================================
    LOOka · Guía de Instalación y Ejecución
 ==========================================================
-Versión: 1.1
+Versión: 2.0
 Última actualización: Septiembre 2026
 ==========================================================
 
@@ -12,148 +12,99 @@ Versión: 1.1
 2. Descarga del proyecto
 3. Configuración inicial
 4. Levantar el sistema con Docker
-5. Probar la app (4 formas)
-6. Compartir con un compañero
-7. Comandos del día a día
-8. Solución de problemas
-9. Estructura del proyecto
-10. Funcionalidades de la app
-11. Soporte
+5. Probar la app
+6. Comandos del día a día
+7. Solución de problemas
+8. Estructura del proyecto
+9. Arquitectura de IA
 
 
 ==========================================================
 1. REQUISITOS PREVIOS (instalar UNA VEZ por PC)
 ==========================================================
 
-Antes de empezar, asegúrate de tener instalado:
-
 [ ] Node.js v20 LTS
     Descarga: https://nodejs.org
-    Verificar: node --version   (debe decir v20.x.x o superior)
 
 [ ] Docker Desktop
     Descarga: https://www.docker.com/products/docker-desktop
     IMPORTANTE: después de instalar, ábrelo y espera a que el ícono
-    de la ballena 🐳 aparezca en la barra de tareas con el mensaje
-    "Docker Desktop is running".
+    de la ballena 🐳 diga "Docker Desktop is running".
 
 [ ] Git
     Descarga: https://git-scm.com/downloads
-    Verificar: git --version
 
 [ ] VS Code (recomendado)
     Descarga: https://code.visualstudio.com
 
 [ ] Expo Go (en el celular)
-    - iPhone: App Store → buscar "Expo Go"
-    - Android: Play Store → buscar "Expo Go"
+    - iPhone: App Store
+    - Android: Play Store
 
 
 ==========================================================
 2. DESCARGA DEL PROYECTO
 ==========================================================
 
-OPCIÓN A · Descarga directa (más fácil)
+OPCIÓN A · Descarga directa
 ---------------------------------------
 1. Ve a: https://github.com/DannLpz/ProyectoFinal_DPS_2026
 2. Botón verde "Code" → "Download ZIP"
-3. Descomprime el ZIP en una carpeta, por ejemplo:
-   C:\Users\TuUsuario\Desktop\LOOka\
+3. Descomprime en una carpeta
 
 OPCIÓN B · Git clone
 --------------------
-Abre PowerShell y ejecuta:
-
    cd "$env:USERPROFILE\Desktop"
    git clone https://github.com/DannLpz/ProyectoFinal_DPS_2026.git
    cd ProyectoFinal_DPS_2026
-
-Verifica que dentro de la carpeta estén:
-   - backend/
-   - ProyectoDPS_FrontEnd-main/
-   - docker-compose.yml
-   - start.ps1
-   - INSTRUCCIONES.txt (este archivo)
 
 
 ==========================================================
 3. CONFIGURACIÓN INICIAL
 ==========================================================
 
-El proyecto necesita 2 archivos .env (variables de entorno).
-NO vienen en GitHub por seguridad, hay que crearlos manualmente.
+El proyecto requiere UN SOLO archivo .env en la raíz.
 
 ----------------------------------------------------------
-3.1 OPCIÓN RÁPIDA: Copiar desde .env.example
+3.1 Copiar desde la plantilla
 ----------------------------------------------------------
-El proyecto incluye archivos .env.example como plantilla.
-Puedes copiarlos y renombrarlos con estos comandos:
-
-   Copy-Item backend\.env.example backend\.env
    Copy-Item .env.example .env
 
-Después editas ambos .env y reemplazas los valores con
-tus credenciales reales (ver secciones 3.3 y 3.4).
-
 ----------------------------------------------------------
-3.2 OPCIÓN MANUAL: Crear backend/.env
+3.2 Editar el archivo .env
 ----------------------------------------------------------
-En VS Code, dentro de la carpeta backend/ crea un archivo
-llamado .env (sin extensión) y pega EXACTAMENTE esto:
+Abre .env en VS Code y reemplaza los valores con tus credenciales:
 
-   DATABASE_URL="postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public"
-   JWT_SECRET="looka_super_secret_key_cambiar_en_produccion"
+   DATABASE_URL=postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public
+   JWT_SECRET=tu_clave_secreta_aqui
    PORT=3000
-   GEMINI_API_KEY=tu_key_de_gemini_aqui
-   FORGE_TIER=standard
-
-Guarda con Ctrl + S.
-
-----------------------------------------------------------
-3.3 Crear .env en la raíz del proyecto
-----------------------------------------------------------
-En la raíz (al mismo nivel que docker-compose.yml) crea otro
-archivo .env con:
-
-   GEMINI_API_KEY=tu_key_de_gemini_aqui
-   FORGE_TIER=standard
-
-Guarda con Ctrl + S.
+   GEMINI_API_KEY=tu_gemini_key
+   TRIPO_API_KEY=tu_tripo_key
+   FORGE_TIER=draft
 
 ----------------------------------------------------------
-3.4 Obtener tu API Key de Gemini (gratis)
+3.3 Obtener tus API Keys (AMBAS GRATIS)
 ----------------------------------------------------------
-1. Ve a: https://aistudio.google.com/apikey
-2. Inicia sesión con tu cuenta de Google
-3. Clic en "Create API key"
-4. Elige "Create API key in new project"
-5. Copia la key completa (empieza con "AQ." o "AIza...")
-6. Pégala en ambos .env
 
-IMPORTANTE: El tier gratuito tiene un límite diario que puede
-variar según la demanda global de Google. Si se agota, la app
-usa automáticamente un clasificador local de respaldo, así que
-las funciones siguen operativas aunque no haya cuota disponible.
+🔵 GEMINI (clasificación de prompts)
+   1. Ve a: https://aistudio.google.com/apikey
+   2. Inicia sesión con Google
+   3. Clic en "Create API key" → "Create API key in new project"
+   4. Copia la key (empieza con "AQ." o "AIza...")
+
+🟢 TRIPO3D (generación de modelos 3D)
+   1. Ve a: https://platform.tripo3d.ai/
+   2. Crea cuenta gratis
+   3. Ve a API Keys y crea una nueva
+   4. Copia la key (empieza con "tsk_")
+   5. Al registrarte obtienes ~300 créditos gratis
+      (suficiente para ~10-15 modelos)
 
 ----------------------------------------------------------
-3.5 Verificar que .env NO se suba a Git
+3.4 Verificar que .env NO se suba a Git
 ----------------------------------------------------------
-Los archivos .env NUNCA deben subirse al repositorio.
-Verifica que el archivo .gitignore (en la raíz) contenga:
-
-   .env
-   */.env
-   **/.env
-
-Puedes verificar con:
-
-   git check-ignore -v backend/.env
    git check-ignore -v .env
-
-Ambos comandos deben responder mostrando la línea del .gitignore.
-
-Si por accidente subes tu GEMINI_API_KEY, regenérala
-inmediatamente en: https://aistudio.google.com/apikey
+   # Debe responder mostrando la línea del .gitignore
 
 
 ==========================================================
@@ -161,331 +112,196 @@ inmediatamente en: https://aistudio.google.com/apikey
 ==========================================================
 
 ----------------------------------------------------------
-4.1 Verificar que Docker esté corriendo
+4.1 Docker corriendo
 ----------------------------------------------------------
-Abre Docker Desktop desde el menú Inicio. Espera a que el
-ícono de la ballena 🐳 diga "Docker Desktop is running".
-
-Verifica desde PowerShell:
-   docker ps
-
-Debe responder sin errores (aunque la lista esté vacía).
+Abre Docker Desktop. Espera a que diga "Docker Desktop is running".
 
 ----------------------------------------------------------
 4.2 Habilitar ejecución de scripts (solo primera vez)
 ----------------------------------------------------------
-Abre PowerShell y ejecuta:
-
    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-
-Cuando pregunte, escribe: S
-Y presiona Enter.
+   # Presiona S cuando pregunte
 
 ----------------------------------------------------------
-4.3 Ejecutar el script de inicio
+4.3 Arrancar todo
 ----------------------------------------------------------
-En PowerShell, navega a la raíz del proyecto:
-
-   cd "ruta\completa\al\proyecto"
-
-Y ejecuta:
-
    .\start.ps1
 
 El script hace AUTOMÁTICAMENTE:
-   1. Verifica que Docker esté corriendo
-   2. Instala dependencias del frontend (primera vez: ~2 min)
-   3. Levanta los 3 contenedores (PostgreSQL, backend, frontend)
-   4. Ejecuta el seed (crea usuario demo + 6 muebles)
+   1. Verifica Docker
+   2. Instala dependencias del frontend (~2 min primera vez)
+   3. Levanta contenedores
+   4. Ejecuta migraciones y seed
    5. Arranca Expo y muestra el QR
 
 Al final verás:
-
    =========================================
-      LOOka listo para usar
+      LOOka listo
    =========================================
-
-     Backend:      http://localhost:3000/api/health
-     Frontend Web: http://localhost:8083
-
-     Escanea el QR con Expo Go en tu celular.
-     Usuario demo: demo / demo123
+     Backend:  http://localhost:3000/api/health
+     Frontend: http://localhost:8083
+     Login:    demo / demo123
 
 
 ==========================================================
-5. PROBAR LA APP (4 formas)
+5. PROBAR LA APP
 ==========================================================
 
 ----------------------------------------------------------
 5.1 En el celular (RECOMENDADO)
 ----------------------------------------------------------
-Requisitos:
-   - El celular y la PC deben estar en la MISMA red WiFi
-   - Tener Expo Go instalado
+1. Celular en la MISMA red WiFi que la PC
+2. Abre Expo Go
+3. Escanea el QR de la terminal
 
-Pasos:
-   1. Abre Expo Go
-   2. Toca "Scan QR code"
-   3. Escanea el código que aparece en la terminal de Expo
-   4. La app se cargará automáticamente
-
-Credenciales de prueba:
+Credenciales:
    Usuario:  demo
    Password: demo123
 
 ----------------------------------------------------------
-5.2 En el navegador del PC (versión web)
+5.2 Web en el PC
 ----------------------------------------------------------
-Abre Chrome o Edge y visita:
-
-   http://localhost:8083
-
-Usa las mismas credenciales: demo / demo123
+http://localhost:8083
 
 ----------------------------------------------------------
-5.3 Desde otro dispositivo usando la IP de la PC
+5.3 Desde otro dispositivo (misma red)
 ----------------------------------------------------------
-Útil para mostrar la app en otra PC o tablet.
-
-1. Averigua tu IP local:
-   Abre PowerShell y ejecuta: ipconfig
-   Busca "Dirección IPv4" (ejemplo: 192.168.1.9)
-
-2. Desde el otro dispositivo abre el navegador:
-   http://TU_IP:8083
-
-   Ejemplo: http://192.168.1.9:8083
-
-Nota: el frontend detecta automáticamente la IP del backend,
-no hay que configurar nada.
-
-----------------------------------------------------------
-5.4 Verificar que todo funciona (checks rápidos)
-----------------------------------------------------------
-Abre en el navegador del PC:
-
-   http://localhost:3000/api/health
-   → Debe mostrar: {"status":"ok","message":"LOOka backend funcionando 🚀"}
-
-   http://localhost:3000/api/furniture/default
-   → Debe mostrar un array con 6 muebles predeterminados
-
-   http://localhost:3000/ar/viewer?model=/models/silla.glb&name=Test
-   → Debe mostrar la silla 3D girando con un botón de AR
+1. Obtén tu IP:  ipconfig
+2. Desde otro dispositivo:  http://TU_IP:8083
 
 
 ==========================================================
-6. COMPARTIR CON UN COMPAÑERO (misma red WiFi)
+6. COMANDOS DEL DÍA A DÍA
 ==========================================================
 
-1. Ambos dispositivos deben estar en la misma red WiFi.
-
-2. El dueño del backend ejecuta en PowerShell:
-   ipconfig
-   Y busca "Dirección IPv4" (ejemplo: 192.168.1.9).
-
-3. El compañero desde su navegador visita:
-   http://192.168.1.9:8083
-
-4. O desde Expo Go toca "Enter URL manually" e ingresa:
-   exp://192.168.1.9:8081
-
-Nota: la app detecta la IP del backend automáticamente, por lo
-que no hay que configurar nada extra.
-
-IMPORTANTE: Si el compañero está en OTRA red (WiFi distinto o
-datos móviles), la conexión NO funcionará porque el backend
-corre localmente en tu PC. En ese caso, se necesita exponer
-el backend a internet (Ngrok, Railway, etc.).
+Arrancar:           .\start.ps1
+Detener todo:       Ctrl+C (Expo) + docker-compose stop
+Ver estado:         docker ps
+Ver logs:           docker logs looka_backend -f
+Reiniciar backend:  docker-compose restart backend
+Reiniciar todo:     docker-compose down && docker-compose up -d
 
 
 ==========================================================
-7. COMANDOS DEL DÍA A DÍA
-==========================================================
-
-Arrancar todo:
-   cd "ruta\al\proyecto"
-   .\start.ps1
-
-Detener todo:
-   Ctrl + C   (en la terminal de Expo)
-   docker-compose stop
-
-Ver estado de los contenedores:
-   docker ps
-
-Ver logs del backend:
-   docker logs looka_backend -f
-
-Reiniciar solo el backend:
-   docker-compose restart backend
-
-Reiniciar todo:
-   docker-compose down
-   docker-compose up -d
-
-Actualizar dependencias tras un "git pull":
-   cd backend
-   npm install
-   cd ..\ProyectoDPS_FrontEnd-main
-   npm install
-   cd ..
-   docker-compose build --no-cache
-   docker-compose up -d
-
-
-==========================================================
-8. SOLUCIÓN DE PROBLEMAS
+7. SOLUCIÓN DE PROBLEMAS
 ==========================================================
 
 [ERROR] "Docker Desktop no está corriendo"
-→ Abre Docker Desktop, espera ~1 minuto y vuelve a ejecutar.
+→ Ábrelo y espera 1 minuto.
 
 [ERROR] "El puerto 3000 ya está en uso"
-→ Otro servicio está usando el puerto. Solución:
-     docker-compose down
-     docker-compose up -d
+→ docker-compose down && docker-compose up -d
 
 [ERROR] "La ejecución de scripts está deshabilitada"
-→ Ejecuta en PowerShell:
-     Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-   Escribe S y Enter.
+→ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
-[ERROR] El celular no conecta con la app
-→ Verifica que PC y celular estén en la MISMA red WiFi.
-→ Ejecuta PowerShell como Administrador y corre:
+[ERROR] El celular no conecta
+→ Ambos en la misma WiFi.
+→ Como Admin:
      New-NetFirewallRule -DisplayName "LOOka 3000" -Direction Inbound -LocalPort 3000 -Protocol TCP -Action Allow
      New-NetFirewallRule -DisplayName "LOOka 8083" -Direction Inbound -LocalPort 8083 -Protocol TCP -Action Allow
 
-[ERROR] "No pudimos conectar con el servidor" en la app
-→ Verifica que el backend esté corriendo: docker ps
-→ Verifica que en el navegador del PC funcione:
-     http://localhost:3000/api/health
-   Debe mostrar: {"status":"ok",...}
+[ERROR] "No pudimos conectar con el servidor"
+→ Verifica: docker ps
+→ Abre: http://localhost:3000/api/health
 
-[ERROR] "Cuota de Gemini agotada" o "429"
-→ El tier gratuito tiene un límite diario variable.
-→ Espera 24h o usa una API key diferente.
-→ La app usa automáticamente un clasificador local de respaldo,
-  así que la demo funcionará igual.
+[ERROR] "TRIPO_API_KEY no configurada"
+→ Verifica que la key empiece con "tsk_"
+→ Verifica que esté en .env en la raíz
+→ docker-compose restart backend
 
-[ERROR] "The table public.Listing does not exist"
-→ La migración de base de datos no se aplicó. Solución:
-     docker exec -it looka_backend npx prisma db push
-     docker-compose restart backend
+[ERROR] "Sin créditos" en Tripo
+→ Se agotaron los créditos gratis (~300).
+→ Espera o crea una cuenta nueva.
 
 [ERROR] La cámara AR no se activa en iPhone
-→ Debe ser iPhone 6s o superior con iOS 12+
-→ Abre Safari (NO Chrome, no funciona)
+→ Requiere iPhone 6s+ con iOS 12+
+→ Abre Safari (NO Chrome)
 → Ajustes → Safari → Realidad Aumentada → "Preguntar"
-→ Cierra Safari por completo y vuelve a intentar
 
-[ERROR] El QR de Expo no funciona
-→ En Expo Go toca "Enter URL manually"
-→ Escribe la URL que aparece arriba del QR:
-     exp://TU_IP:8081
-
-[ERROR] Los modelos 3D no cargan
-→ Verifica que el backend esté corriendo: docker ps
-→ Prueba en el navegador:
-     http://localhost:3000/models/silla.glb
-   Debe descargar el archivo .glb
+[ERROR] El modelo no carga (queda en "Cargando...")
+→ Verifica que el .glb esté en backend/public/models:
+     ls backend\public\models
+→ Prueba la URL en el navegador:
+     http://localhost:3000/models/tripo_xxx.glb
 
 
 ==========================================================
-9. ESTRUCTURA DEL PROYECTO
+8. ESTRUCTURA DEL PROYECTO
 ==========================================================
 
 ProyectoV3/
 │
 ├── backend/                      API REST (Node.js + Express + TypeScript)
-│   ├── prisma/                   Esquema de base de datos y migraciones
-│   ├── public/models/            Modelos 3D (.glb) del catálogo
+│   ├── prisma/                   Esquema de BD y migraciones
+│   ├── public/models/            Modelos 3D (.glb) locales y generados
 │   ├── src/
 │   │   ├── config/               Configuración de Prisma
-│   │   ├── controllers/          Lógica de endpoints
+│   │   ├── controllers/          Endpoints
 │   │   ├── middlewares/          Autenticación JWT
-│   │   ├── routes/               Definición de rutas
-│   │   └── services/             Lógica de negocio (IA, listings, etc.)
-│   ├── .env.example              Plantilla de variables de entorno
+│   │   ├── routes/               Rutas
+│   │   └── services/             Lógica de negocio
+│   │       ├── ai.service.ts     Orquestador IA
+│   │       ├── gemini.service.ts Cascada de 5 modelos Gemini
+│   │       ├── tripo.service.ts  Generación 3D con Tripo3D
+│   │       └── ...
 │   ├── Dockerfile
 │   └── package.json
 │
 ├── ProyectoDPS_FrontEnd-main/    App móvil (React Native + Expo)
-│   ├── src/
-│   │   ├── components/           Componentes reutilizables
-│   │   ├── config/               Tema y configuración
-│   │   ├── hooks/                Hooks personalizados
-│   │   ├── models/               Interfaces TypeScript
-│   │   ├── navigation/           React Navigation
-│   │   ├── screens/              Pantallas de la app
-│   │   ├── services/             Consumo de API
-│   │   ├── store/                Estado global (Zustand)
-│   │   └── utils/                Utilidades
-│   ├── .env.example              Plantilla de variables de entorno
-│   ├── Dockerfile
-│   └── package.json
+│   └── src/
+│       ├── screens/              Pantallas (Login, Home, Catalog, etc.)
+│       ├── services/             Consumo de API
+│       ├── store/                Estado global (Zustand)
+│       └── ...
 │
-├── k8s/                          Manifiestos de Kubernetes
-├── .env.example                  Plantilla de variables de entorno raíz
-├── .gitignore                    Archivos ignorados por Git
 ├── docker-compose.yml            Orquestación de contenedores
 ├── start.ps1                     Script de inicio automático
+├── .env.example                  Plantilla de variables de entorno
 ├── INSTRUCCIONES.txt             Este archivo
 └── README.md                     Documentación principal
 
 
 ==========================================================
-10. FUNCIONALIDADES DE LA APP
+9. ARQUITECTURA DE IA
 ==========================================================
 
-Una vez dentro, podrás:
+Pipeline de generación:
 
-📱 Login
-   Credenciales de prueba: demo / demo123
+   Usuario escribe "una mesa semicircular de madera"
+              ↓
+   [1. Gemini - Cascada de 5 modelos]
+       Prueba: gemini-3.6-flash
+       Si falla → gemini-3.5-flash
+       Si falla → gemini-3.7-flash
+       ... hasta encontrar uno disponible
+       ↓
+   Retorna: { isFurniture: true, category: "mesa",
+              enhancedPrompt: "a 3D model of a modern semicircular wooden table" }
+              ↓
+   [2. Tripo3D - Generación 3D]
+       Crea tarea → Polling cada 3s → 100% success
+       ↓
+   Descarga el .glb localmente en /models/tripo_xxx.glb
+              ↓
+   [3. Fallback local]
+       Si Tripo falla → usa modelo predeterminado de la misma categoría
+              ↓
+   Guarda en BD y muestra en la app
 
-🛍️ Catálogo
-   6 muebles predeterminados con filtros por categoría.
-   Cada mueble tiene un botón de corazón para guardarlo en
-   favoritos.
-
-🤖 Para ti (IA)
-   Describe un mueble en lenguaje natural ("una silla azul")
-   y la IA genera un modelo 3D único con Google Gemini + Forge.
-   Filtra automáticamente peticiones que no sean muebles
-   (ej: "un carro" es rechazado).
-
-❤️ Favoritos
-   Guarda muebles del catálogo tocando el corazón.
-   Los favoritos persisten durante la sesión.
-
-📷 Ver en mi espacio (AR)
-   Proyecta los muebles en tu entorno real con la cámara del
-   celular usando AR Quick Look (iOS) o Scene Viewer (Android).
-
-💰 Publicar mueble
-   Ponle precio, título y descripción a cualquier mueble del
-   catálogo o generado por IA.
-
-🛒 Mi carrito
-   Agrega muebles publicados, revisa el total y simula una
-   compra.
+Tiempos aproximados:
+   - Gemini: 1-3 segundos
+   - Tripo3D: 60-150 segundos
+   - Total: 1.5 a 2.5 minutos
 
 
 ==========================================================
-11. SOPORTE
+10. SOPORTE
 ==========================================================
 
-Si encuentras un error que no puedas resolver:
-
-1. Verifica los logs del backend:
-   docker logs looka_backend --tail 50
-
-2. Revisa si los contenedores están arriba:
-   docker ps
-
-3. Adjunta una captura del error completo y los logs
-   al canal del equipo.
+1. Logs del backend:    docker logs looka_backend --tail 50
+2. Estado contenedores: docker ps
+3. Adjunta captura de error y logs al equipo.
 
 ==========================================================
 Fin del documento

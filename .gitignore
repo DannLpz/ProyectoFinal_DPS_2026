@@ -135,3 +135,10 @@ desktop.ini
 # ============================================
 backend/node_modules/.prisma/
 backend/node_modules/@prisma/client/
+# Modelos generados por IA (pesan mucho)
+backend/public/models/tripo_*.glb
+backend/public/models/generated-*.glb
+
+# Archivos temporales
+*.txt
+!INSTRUCCIONES.txt

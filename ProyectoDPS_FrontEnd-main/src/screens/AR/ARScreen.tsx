@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
+
 import { Feather } from '@expo/vector-icons';
 import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import type { MainTabParamList } from '../../navigation/types';
@@ -43,11 +44,24 @@ export function ARScreen() {
   const defaultFurniture = useCatalogStore((s) => s.defaultFurniture);
   const generatedFurniture = useCatalogStore((s) => s.generatedFurniture);
   const setDefaultFurniture = useCatalogStore((s) => s.setDefaultFurniture);
+  const setGeneratedFurniture = useCatalogStore((s) => s.setGeneratedFurniture);
 
   useEffect(() => {
-    loadDefaultFurniture();
+    loadAllFurniture();
   }, []);
 
+useFocusEffect(
+  React.useCallback(() => {
+    FurnitureService.getGeneratedFurniture()
+      .then((items) => {
+        if (Array.isArray(items) && items.length > 0) {
+          setGeneratedFurniture(items);
+        }
+      })
+      .catch(() => {});
+  }, [])
+);
+  
   // Auto-abrir el item preseleccionado desde el catálogo
 useEffect(() => {
   if (preselectedItemId && defaultFurniture.length > 0) {
@@ -60,32 +74,25 @@ useEffect(() => {
   }
 }, [preselectedItemId, defaultFurniture, generatedFurniture]);
 
-  const loadDefaultFurniture = async () => {
-    try {
-      setLoading(true);
-      console.log('🔍 [DIAG] BASE_URL:', BASE_URL);
-      console.log('🔍 [DIAG] Cargando muebles desde:', `${BASE_URL}/furniture/default`);
+  const loadAllFurniture = async () => {
+  try {
+    setLoading(true);
+    const [defaults, generated] = await Promise.all([
+      FurnitureService.getDefaultFurniture(),
+      FurnitureService.getGeneratedFurniture().catch(() => []),
+    ]);
 
-      const defaults = await FurnitureService.getDefaultFurniture();
-
-      console.log('🔍 [DIAG] Muebles recibidos:', defaults.length);
-      defaults.forEach((m) => {
-        console.log(`🔍 [DIAG] ${m.name} → modelUrl original: ${m.modelUrl}`);
-        console.log(`🔍 [DIAG] ${m.name} → URL construida: ${buildModelUrl(m.modelUrl)}`);
-      });
-
-      setDefaultFurniture(defaults);
-    } catch (err: any) {
-      console.error('❌ [DIAG] Error cargando muebles:', err);
-      if (err?.response) {
-        console.error('❌ [DIAG] Status:', err.response.status);
-        console.error('❌ [DIAG] Data:', err.response.data);
-      }
-      setError('No pudimos cargar los muebles');
-    } finally {
-      setLoading(false);
+    setDefaultFurniture(defaults);
+    if (Array.isArray(generated) && generated.length > 0) {
+      setGeneratedFurniture(generated);
     }
-  };
+  } catch (err) {
+    console.error('[AR] Error cargando muebles:', err);
+    setError('No pudimos cargar los muebles');
+  } finally {
+    setLoading(false);
+  }
+};
 
 const openARInBrowser = async (item: Furniture) => {
   const apiBase = BASE_URL.replace('/api', '');
@@ -130,7 +137,7 @@ const openARInBrowser = async (item: Furniture) => {
           <Text style={styles.errorText}>{error}</Text>
           <Pressable
             style={{ marginTop: 20, padding: 12, backgroundColor: theme.colors.primary, borderRadius: 8 }}
-            onPress={loadDefaultFurniture}
+            onPress={loadAllFurniture}
           >
             <Text style={{ color: 'white', fontWeight: '700' }}>Reintentar</Text>
           </Pressable>

@@ -5,19 +5,14 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 const responseSchema = {
   type: Type.OBJECT,
   properties: {
-    isFurniture: {
-      type: Type.BOOLEAN,
-      description: 'True si la descripción del usuario corresponde a un mueble.',
-    },
+    isFurniture: { type: Type.BOOLEAN, description: 'true si es un mueble' },
     category: {
       type: Type.STRING,
-      description:
-        'Categoría del mueble: silla, mesa, sofa, cama, ropero, estante, escritorio, television, organizador, zapatero u otro.',
+      description: 'silla|mesa|sofa|cama|ropero|estante|escritorio|television|organizador|zapatero|otro',
     },
     enhancedPrompt: {
       type: Type.STRING,
-      description:
-        'Prompt en inglés, técnico y detallado, optimizado para generar un modelo 3D con IA.',
+      description: 'Prompt en inglés optimizado para generación 3D (máx 15 palabras)',
     },
   },
   required: ['isFurniture', 'category', 'enhancedPrompt'],
@@ -29,29 +24,26 @@ export interface GeminiResult {
   enhancedPrompt: string;
 }
 
-// ─────────────────────────────────────────────────────────
-// Fallback local: si Gemini falla (429, 503, sin cuota),
-// usamos un clasificador por keywords.
-// ─────────────────────────────────────────────────────────
+// Fallback local por si todos los modelos fallan
 const FALLBACK_KEYWORDS: Record<string, string[]> = {
   silla: ['silla', 'sillon', 'sillón', 'asiento', 'banco', 'butaca'],
-  mesa: ['mesa', 'mesita', 'mesa de comedor', 'mesa de centro', 'mesa de noche'],
+  mesa: ['mesa', 'mesita', 'mesa de comedor', 'mesa de centro'],
   sofa: ['sofa', 'sofá', 'couch', 'sillon de sala'],
-  cama: ['cama', 'litera', 'cama matrimonial', 'cama individual'],
-  ropero: ['ropero', 'armario', 'closet', 'clóset', 'guardarropa'],
+  cama: ['cama', 'litera', 'cama matrimonial'],
+  ropero: ['ropero', 'armario', 'closet', 'clóset'],
   estante: ['estante', 'librero', 'repisa', 'estanteria', 'estantería'],
   escritorio: ['escritorio', 'buro', 'buró', 'mesa de oficina'],
-  television: ['mueble para televisor', 'mueble de tv', 'soporte de tv', 'rack de tv'],
-  organizador: ['organizador', 'cajonera', 'gavetero', 'comoda', 'cómoda'],
+  television: ['mueble para televisor', 'mueble de tv', 'soporte de tv'],
+  organizador: ['organizador', 'cajonera', 'gavetero', 'comoda'],
   zapatero: ['zapatero', 'mueble de zapatos'],
 };
 
-const NON_FURNITURE: string[] = [
-  'carro', 'coche', 'auto', 'moto', 'bicicleta', 'avion', 'barco', 'tren',
-  'pizza', 'comida', 'hamburguesa', 'taco', 'sushi',
-  'gato', 'perro', 'mascota', 'pajaro', 'pez',
+const NON_FURNITURE = [
+  'carro', 'coche', 'auto', 'moto', 'bicicleta', 'avion', 'barco',
+  'pizza', 'comida', 'hamburguesa', 'taco',
+  'gato', 'perro', 'mascota',
   'computadora', 'celular', 'telefono', 'laptop', 'tablet',
-  'libro', 'pelota', 'juguete', 'ropa', 'zapatos', 'camisa',
+  'libro', 'pelota', 'juguete', 'ropa', 'zapatos',
   'persona', 'hombre', 'mujer', 'niño',
 ];
 
@@ -62,14 +54,12 @@ function normalize(t: string) {
 function fallbackClassify(userPrompt: string): GeminiResult {
   const text = normalize(userPrompt);
 
-  // 1. ¿Es algo prohibido?
   for (const bad of NON_FURNITURE) {
     if (text.includes(normalize(bad))) {
       return { isFurniture: false, category: 'otro', enhancedPrompt: userPrompt };
     }
   }
 
-  // 2. ¿Es un mueble?
   let bestCategory = 'otro';
   let bestScore = 0;
   for (const [cat, keywords] of Object.entries(FALLBACK_KEYWORDS)) {
@@ -87,36 +77,40 @@ function fallbackClassify(userPrompt: string): GeminiResult {
     return { isFurniture: false, category: 'otro', enhancedPrompt: userPrompt };
   }
 
-  // Prompt básico en inglés para Forge
-  const enhancedPrompt = `a 3D model of a ${bestCategory}, low poly, clean geometry, white background`;
-
   return {
     isFurniture: true,
     category: bestCategory,
-    enhancedPrompt,
+    enhancedPrompt: `a 3D model of a ${bestCategory}`,
   };
 }
 
-// ─────────────────────────────────────────────────────────
-// Función principal con reintentos y fallback
-// ─────────────────────────────────────────────────────────
 export async function enhancePromptWithGemini(
   userPrompt: string
 ): Promise<GeminiResult> {
-  const systemInstruction = `Eres un experto en diseño de prompts para generación de modelos 3D.
-Analiza el texto del usuario. Si NO describe un mueble, responde isFurniture: false.
-Si SÍ es un mueble, clasifícalo en una de las categorías y genera un prompt en INGLÉS, técnico y detallado, optimizado para un generador de mallas como TRELLIS.
-Responde únicamente con el JSON especificado.`;
+  const systemInstruction = `Eres un experto en prompts para generación de modelos 3D.
+Analiza el texto del usuario.
+REGLAS:
+1. Si NO es un mueble, isFurniture: false.
+2. Si SÍ es un mueble, clasifícalo.
+3. enhancedPrompt en INGLÉS, máx 15 palabras, empieza con "a 3D model of a".
+4. NO uses PBR, render, textures ni adjetivos abstractos.
+Responde SOLO con el JSON.`;
 
-  const MAX_RETRIES = 2;
-  let lastError: any = null;
+  // Cascada: si uno falla, pasa al siguiente
+  const GEMINI_MODELS = [
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-3.7-flash',
+    'gemini-3.8-flash',
+    'gemini-3.1-flash-lite',
+  ];
 
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+  for (const modelName of GEMINI_MODELS) {
     try {
-      console.log(`[Gemini] Intento ${attempt}/${MAX_RETRIES}...`);
+      console.log(`[Gemini] Probando: ${modelName}`);
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+        model: modelName,
         contents: `Texto del usuario: "${userPrompt}"`,
         config: {
           systemInstruction,
@@ -129,36 +123,19 @@ Responde únicamente con el JSON especificado.`;
         response.text ??
         (response as any).candidates?.[0]?.content?.parts?.[0]?.text;
 
-      if (!text) throw new Error('Respuesta vacía de Gemini');
+      if (!text) throw new Error('Respuesta vacía');
 
       const result: GeminiResult = JSON.parse(text);
-
-      console.log('[Gemini] ✅ Original:', userPrompt);
-      console.log('[Gemini] ✅ Enhanced:', result.enhancedPrompt);
-
+      console.log(`[Gemini] ✅ ${modelName} respondió`);
+      console.log('[Gemini] Enhanced:', result.enhancedPrompt);
       return result;
     } catch (err: any) {
-      lastError = err;
-
       const msg = String(err?.message || '');
-      const is429 = msg.includes('429') || msg.includes('quota');
-      const is503 = msg.includes('503') || msg.includes('high demand');
-
-      if (is429) {
-        console.warn('[Gemini] ⚠️ Cuota agotada. Usando fallback local...');
-        return fallbackClassify(userPrompt);   // 👈 Fallback inmediato
-      }
-
-      if (is503 && attempt < MAX_RETRIES) {
-        console.log('[Gemini] 503. Reintentando en 2s...');
-        await new Promise((r) => setTimeout(r, 2000));
-        continue;
-      }
-
-      throw err;
+      console.warn(`[Gemini] ${modelName} falló:`, msg.slice(0, 80));
+      continue;
     }
   }
 
-  console.warn('[Gemini] ❌ Todos los intentos fallaron. Usando fallback local...');
+  console.warn('[Gemini] ❌ Todos fallaron. Usando fallback local.');
   return fallbackClassify(userPrompt);
 }
