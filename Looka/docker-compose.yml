@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: looka_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: looka_user
+      POSTGRES_PASSWORD: looka_password
+      POSTGRES_DB: looka_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - looka_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: looka_backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    env_file:
+      - .env                    # 👈 Lee TODO desde la raíz
+    environment:
+      DATABASE_URL: postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend/public/models:/app/public/models
+    networks:
+      - looka_network
+
+  frontend:
+    build:
+      context: ./ProyectoDPS_FrontEnd-main
+      dockerfile: Dockerfile
+    container_name: looka_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '8083:80'
+    networks:
+      - looka_network
+
+volumes:
+  postgres_data:
+
+networks:
+  looka_network:
+    driver: bridge

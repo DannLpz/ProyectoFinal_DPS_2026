@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "LOOka",
+    "slug": "looka",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#B01938",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "sv.edu.udb.looka"
+    },
+    "android": {
+      "package": "sv.edu.udb.looka",
+      "adaptiveIcon": {
+        "backgroundColor": "#B01938",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

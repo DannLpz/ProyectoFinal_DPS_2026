@@ -1,0 +1,50 @@
+# ==========================================
+# Backend - Deployment
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: looka
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: projectov3-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://looka_user:looka_password@postgres:5432/looka_db?schema=public"
+            - name: JWT_SECRET
+              value: "looka_super_secret_key_cambiar_en_produccion"
+            - name: PORT
+              value: "3000"
+---
+# ==========================================
+# Backend - Service
+# ==========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: looka
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
