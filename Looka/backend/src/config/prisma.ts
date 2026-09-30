@@ -1,13 +1,13 @@
 /**
  * @file prisma.ts
- * @description Cliente Prisma singleton para toda la aplicación.
+ * @description Cliente Prisma compartido por los módulos del backend.
  *
  * Se exporta una ÚNICA instancia de PrismaClient para evitar
- * abrir múltiples conexiones a PostgreSQL en el mismo proceso.
- * Este patrón se conoce como "Singleton" y es recomendado
- * por la documentación oficial de Prisma.
+ * Centraliza el acceso a PostgreSQL y evita crear conexiones
+ * independientes desde cada servicio.
  *
  * @author Equipo LOOka
+ * @version 2.0.0
  */
 
 import { PrismaClient } from '@prisma/client';

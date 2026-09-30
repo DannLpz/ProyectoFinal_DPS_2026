@@ -1,8 +1,16 @@
+/**
+ * @file ai.service.ts
+ * @description Orquesta la generación de muebles descritos mediante texto.
+ * Enriquece la solicitud con IA externa, genera el modelo 3D y persiste el resultado.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { prisma } from '../config/prisma';
 import { enhancePromptWithGemini } from './gemini.service';
 import { generate3DModelWithTripo } from './tripo.service';
 
-// Mapa de fallback local por categoría
+// Modelos locales disponibles si la generación remota no produce un recurso utilizable.
 const LOCAL_MODELS: Record<string, string> = {
   silla: '/models/silla.glb',
   mesa: '/models/mesa.glb',
@@ -16,13 +24,24 @@ const LOCAL_MODELS: Record<string, string> = {
   zapatero: '/models/estante.glb',
 };
 
+/**
+ * Genera y registra un mueble solicitado en lenguaje natural.
+ * @param prompt Descripción del mueble que se desea generar.
+ * @param userId Identificador del usuario propietario del recurso.
+ * @returns Datos del mueble persistido, incluidos los recursos del modelo.
+ * @throws Error si falla la generación o el registro del recurso.
+ * @example
+ * const furniture = await generateFurnitureFromPrompt('Silla de madera clara', userId);
+ */
 export async function generateFurnitureFromPrompt(
   prompt: string,
   userId: string
 ) {
   const globalStart = Date.now();
 
-  // 1. Gemini: clasificar y mejorar prompt (1 sola vez)
+  // ─────────────────────────────
+  // SECCIÓN: Clasificación y enriquecimiento
+  // ─────────────────────────────
   console.log('[AI] Consultando Gemini...');
   const geminiResult = await enhancePromptWithGemini(prompt);
 
@@ -32,7 +51,9 @@ export async function generateFurnitureFromPrompt(
     );
   }
 
-  // 2. Tripo3D: generar modelo (si hay key)
+  // ─────────────────────────────
+  // SECCIÓN: Generación remota opcional
+  // ─────────────────────────────
   const tripoKey = process.env.TRIPO_API_KEY || '';
   const hasTripoKey = tripoKey.startsWith('tsk_');
 
@@ -48,9 +69,12 @@ export async function generateFurnitureFromPrompt(
     console.warn('[AI] TRIPO_API_KEY inválida o ausente');
   }
 
-  // 3. Fallback: usar modelo local
+  // ─────────────────────────────
+  // SECCIÓN: Fallback local
+  // ─────────────────────────────
   if (!result?.glbUrl) {
     console.warn('[AI] Usando fallback local...');
+    // Mantiene disponible el flujo aunque Tripo no esté configurado o falle.
     const fallbackGlb = LOCAL_MODELS[geminiResult.category] || '/models/silla.glb';
 
     result = {
@@ -69,7 +93,9 @@ export async function generateFurnitureFromPrompt(
   const cleanName =
     prompt.trim().charAt(0).toUpperCase() + prompt.trim().slice(1);
 
-  // 4. Limpieza automática de IA viejos (más de 15 min)
+  // ─────────────────────────────
+  // SECCIÓN: Limpieza de generaciones antiguas
+  // ─────────────────────────────
   const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000);
   try {
     const deleted = await prisma.furniture.deleteMany({
@@ -86,7 +112,9 @@ export async function generateFurnitureFromPrompt(
     console.warn('[AI] Error en limpieza:', err);
   }
 
-  // 5. Guardar en BD
+  // ─────────────────────────────
+  // SECCIÓN: Persistencia del resultado
+  // ─────────────────────────────
   const generated = await prisma.furniture.create({
     data: {
       name: cleanName,

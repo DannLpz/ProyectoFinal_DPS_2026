@@ -1,3 +1,11 @@
+/**
+ * @file ScreenContainer.tsx
+ * @description Proporciona una estructura común para el contenido de las pantallas.
+ * Integra áreas seguras, desplazamiento y estilos de página configurables.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import type { ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
@@ -12,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '../../config/theme';
 
+/** Propiedades de diseño y contenido del contenedor de pantalla. */
 interface ScreenContainerProps {
   children: ReactNode;
   backgroundColor?: string;
@@ -19,6 +28,15 @@ interface ScreenContainerProps {
   scrollable?: boolean;
 }
 
+/**
+ * Renderiza el contenido de una pantalla dentro de un área segura.
+ * @param props Propiedades del contenedor.
+ * @param props.children Contenido que se mostrará dentro de la pantalla.
+ * @param props.backgroundColor Color de fondo opcional del contenedor.
+ * @param props.contentContainerStyle Estilos adicionales del contenido.
+ * @param props.scrollable Indica si el contenido puede desplazarse verticalmente.
+ * @returns Árbol de elementos React Native que envuelve el contenido.
+ */
 export function ScreenContainer({
   children,
   backgroundColor = theme.colors.background,

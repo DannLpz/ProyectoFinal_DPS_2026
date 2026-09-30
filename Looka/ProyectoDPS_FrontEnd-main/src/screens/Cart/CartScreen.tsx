@@ -1,3 +1,11 @@
+/**
+ * @file CartScreen.tsx
+ * @description Muestra y administra los muebles agregados al carrito.
+ * Actualiza la presentación del carrito al recuperar el foco de navegación.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -17,6 +25,10 @@ import { ListingService } from '../../services/ListingService';
 import { useCartStore } from '../../store/useCartStore';
 import type { Listing } from '../../models/Listing';
 
+/**
+ * Renderiza el resumen y las acciones disponibles para el carrito.
+ * @returns Pantalla de carrito con los artículos seleccionados.
+ */
 export function CartScreen() {
   const navigation = useNavigation();
   const { items, addItem, removeItem, isInCart, getTotal, clear } = useCartStore();

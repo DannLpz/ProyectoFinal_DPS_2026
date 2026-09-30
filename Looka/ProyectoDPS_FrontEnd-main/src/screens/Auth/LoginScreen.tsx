@@ -1,3 +1,11 @@
+/**
+ * @file LoginScreen.tsx
+ * @description Permite ingresar credenciales e iniciar una sesión en LOOka.
+ * Gestiona el estado del formulario y comunica el resultado de autenticación.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -10,8 +18,13 @@ import { RealAuthService } from '../../services/RealAuthService';
 import { useAuthStore } from '../../store/useAuthStore';
 import type { RootStackParamList } from '../../navigation/types';
 
+/** Tipo de navegación disponible desde el flujo de inicio de sesión. */
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
+/**
+ * Renderiza el formulario de inicio de sesión.
+ * @returns Pantalla con campos de acceso y acciones de autenticación.
+ */
 export function LoginScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { login } = useAuthStore();

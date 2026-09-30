@@ -1,3 +1,11 @@
+/**
+ * @file MainNavigator.tsx
+ * @description Configura la navegación principal de la aplicación móvil.
+ * Combina el flujo de autenticación con las pestañas funcionales del marketplace.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React from 'react';
 import { CartScreen } from '../screens/Cart/CartScreen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -45,6 +53,10 @@ function MainTabs() {
   );
 }
 
+/**
+ * Construye el contenedor y los navegadores principales de LOOka.
+ * @returns Navegación raíz con las rutas de autenticación y la aplicación.
+ */
 export function MainNavigator() {
   return (
     <NavigationContainer>

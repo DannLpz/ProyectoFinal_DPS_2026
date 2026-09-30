@@ -1,3 +1,11 @@
+/**
+ * @file FavoritesScreen.tsx
+ * @description Muestra la colección de muebles guardados como favoritos.
+ * Permite revisar o retirar elementos de la lista personal del usuario.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React from 'react';
 import {
   FlatList,
@@ -24,6 +32,10 @@ const CATEGORY_META: Record<string, { emoji: string; color: string }> = {
   generado: { emoji: '🤖', color: '#F4A4B8' },
 };
 
+/**
+ * Renderiza los muebles favoritos de la cuenta activa.
+ * @returns Pantalla con la colección de favoritos y sus acciones.
+ */
 export function FavoritesScreen() {
   const favorites = useFavoritesStore((s) => s.favorites);
   const removeFavorite = useFavoritesStore((s) => s.removeFavorite);

@@ -1,3 +1,11 @@
+/**
+ * @file MenuCard.tsx
+ * @description Componente de opción para acceder a una sección desde el menú.
+ * Muestra el icono y los datos definidos por el modelo de opción.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { Feather } from '@expo/vector-icons';
 import {
   Pressable,
@@ -11,12 +19,20 @@ import {
 import { theme } from '../../config/theme';
 import type { MenuOption } from '../../models/MenuOption';
 
+/** Datos, acción y estilos opcionales de una opción de menú. */
 interface MenuCardProps {
   option: MenuOption;
   onPress: (option: MenuOption) => void;
   style?: StyleProp<ViewStyle>;
 }
 
+/**
+ * Renderiza una opción de navegación interactiva.
+ * @param option Configuración de icono y contenido de la opción.
+ * @param onPress Acción ejecutada al seleccionar la opción.
+ * @param style Estilo adicional aplicado al contenedor.
+ * @returns Tarjeta interactiva para el menú de la aplicación.
+ */
 export function MenuCard({ option, onPress, style }: MenuCardProps) {
   return (
     <Pressable

@@ -1,6 +1,15 @@
+/**
+ * @file constants.ts
+ * @description Reúne constantes de navegación y mensajes de la aplicación.
+ * Centraliza valores compartidos para evitar duplicación entre pantallas.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { theme } from '../config/theme';
 import type { MenuOption } from '../models/MenuOption';
 
+/** Opciones estáticas que conforman el menú principal de la aplicación. */
 export const MENU_OPTIONS: readonly MenuOption[] = [
   {
     id: 'catalog',
@@ -48,5 +57,6 @@ export const MENU_OPTIONS: readonly MenuOption[] = [
   },
 ] as const;
 
+/** Mensaje mostrado para funcionalidades previstas para una fase posterior. */
 export const PHASE_TWO_MESSAGE =
   'Esta opción es una vista previa del menú.';

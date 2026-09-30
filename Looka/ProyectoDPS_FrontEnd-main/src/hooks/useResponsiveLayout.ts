@@ -1,7 +1,16 @@
+/**
+ * @file useResponsiveLayout.ts
+ * @description Expone medidas y decisiones de diseño según el tamaño de ventana.
+ * Mantiene el cálculo del layout ligado a las dimensiones actuales del dispositivo.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { useWindowDimensions } from 'react-native';
 
 import { theme } from '../config/theme';
 
+/** Medidas derivadas de la ventana para organizar el contenido responsivo. */
 export interface ResponsiveLayout {
   horizontalPadding: number;
   contentWidth: number;
@@ -9,6 +18,10 @@ export interface ResponsiveLayout {
   menuCardWidth: number;
 }
 
+/**
+ * Obtiene las dimensiones y parámetros de layout vigentes.
+ * @returns Medidas y configuración responsiva para la pantalla actual.
+ */
 export function useResponsiveLayout(): ResponsiveLayout {
   const { width } = useWindowDimensions();
   const horizontalPadding = width < 360 ? theme.spacing.md : theme.spacing.lg;

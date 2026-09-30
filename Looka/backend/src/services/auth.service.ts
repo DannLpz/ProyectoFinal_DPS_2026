@@ -9,6 +9,7 @@
  *  - Hasheo de contraseñas con bcrypt
  *
  * @author Equipo LOOka
+ * @version 2.0.0
  */
 
 import bcrypt from 'bcryptjs';
@@ -27,6 +28,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
  * @param {string} data.displayName - Nombre visible en la app
  * @returns {Promise<object>} Token JWT y datos del usuario
  * @throws {Error} Si el email o username ya existen
+ * @example
+ * const session = await registerUser({ email, username, password, displayName });
  */
 export async function registerUser(data: {
   email: string;
@@ -74,6 +77,9 @@ export async function registerUser(data: {
  * @param {string} identifier - Email o username del usuario
  * @param {string} password - Contraseña en texto plano
  * @returns {Promise<object>} Resultado con { success, token, user } o { success: false, message }
+ * @throws {Error} Si falla la consulta de usuario o la firma del token.
+ * @example
+ * const session = await loginUser('user@example.com', 'contraseña-segura');
  */
 export async function loginUser(identifier: string, password: string) {
   // Buscar al usuario por email o username

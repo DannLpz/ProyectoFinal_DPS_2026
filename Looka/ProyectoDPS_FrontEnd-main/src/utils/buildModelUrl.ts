@@ -1,3 +1,11 @@
+/**
+ * @file buildModelUrl.ts
+ * @description Construye URL absolutas para los recursos de modelos 3D.
+ * Resuelve rutas relativas usando la URL base configurada para la API.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { BASE_URL } from '../services/apiClient';
 
 /**
@@ -6,6 +14,11 @@ import { BASE_URL } from '../services/apiClient';
  *   - Rutas relativas: "/models/silla.glb"
  *   - URLs rotas: "http://:3000/models/silla.glb"
  *   - URLs completas: "https://ejemplo.com/modelo.glb"
+ */
+/**
+ * Convierte una ruta de modelo en una URL absoluta lista para consumir.
+ * @param path Ruta relativa o absoluta del recurso del modelo.
+ * @returns URL absoluta del recurso 3D.
  */
 export function buildModelUrl(path: string): string {
   const apiBase = BASE_URL.replace('/api', '');

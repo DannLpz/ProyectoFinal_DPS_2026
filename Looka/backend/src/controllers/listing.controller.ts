@@ -1,6 +1,20 @@
+/**
+ * @file listing.controller.ts
+ * @description Controlador HTTP de las publicaciones del marketplace.
+ * Valida las solicitudes y delega las operaciones de datos al servicio correspondiente.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { Request, Response } from 'express';
 import * as listingService from '../services/listing.service';
 
+/**
+ * Crea una publicación validando sus campos obligatorios.
+ * @param req Solicitud autenticada con título, descripción, precio y mueble.
+ * @param res Respuesta con la publicación creada o el motivo del rechazo.
+ * @returns Respuesta HTTP con estado 201 o 400.
+ */
 export async function create(req: Request, res: Response) {
   try {
     const userId = (req as any).userId;
@@ -31,6 +45,12 @@ export async function create(req: Request, res: Response) {
   }
 }
 
+/**
+ * Obtiene las publicaciones del vendedor autenticado.
+ * @param req Solicitud HTTP autenticada.
+ * @param res Respuesta HTTP con la colección o el error.
+ * @returns Respuesta HTTP con estado 200 o 500.
+ */
 export async function getMine(req: Request, res: Response) {
   try {
     const userId = (req as any).userId;
@@ -41,6 +61,12 @@ export async function getMine(req: Request, res: Response) {
   }
 }
 
+/**
+ * Obtiene todas las publicaciones disponibles.
+ * @param req Solicitud HTTP entrante.
+ * @param res Respuesta HTTP con la colección o el error.
+ * @returns Respuesta HTTP con estado 200 o 500.
+ */
 export async function getAll(req: Request, res: Response) {
   try {
     const listings = await listingService.getAllListings();
@@ -50,6 +76,12 @@ export async function getAll(req: Request, res: Response) {
   }
 }
 
+/**
+ * Elimina una publicación propiedad del usuario autenticado.
+ * @param req Solicitud con el identificador en la ruta y usuario autenticado.
+ * @param res Respuesta que confirma la eliminación o comunica el error.
+ * @returns Respuesta HTTP con estado 200 o 400.
+ */
 export async function remove(req: Request, res: Response) {
   try {
     const userId = (req as any).userId;

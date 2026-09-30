@@ -1,3 +1,11 @@
+/**
+ * @file PublishScreen.tsx
+ * @description Permite crear una publicación a partir de un mueble disponible.
+ * Reúne los campos comerciales y valida la selección antes del envío.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -22,6 +30,7 @@ import { ListingService } from '../../services/ListingService';
 import type { Furniture } from '../../models/Furniture';
 import type { RootStackParamList } from '../../navigation/types';
 
+/** Navegación tipada para completar o abandonar la creación de una publicación. */
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Publish'>;
 
 // Emojis por categoría
@@ -46,6 +55,10 @@ function getEmojiForFurniture(item: Furniture): string {
   return CATEGORY_EMOJI[item.category] || '🪑';
 }
 
+/**
+ * Renderiza el formulario de publicación de un mueble.
+ * @returns Pantalla con datos comerciales y acción de publicación.
+ */
 export function PublishScreen() {
   const navigation = useNavigation<NavigationProp>();
 

@@ -1,3 +1,11 @@
+/**
+ * @file CatalogScreen.tsx
+ * @description Presenta el catálogo de muebles y sus opciones de filtrado.
+ * Coordina la carga de datos y la navegación hacia las acciones de cada artículo.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -38,8 +46,13 @@ const CATEGORY_META: Record<string, { emoji: string; bg: string; accent: string 
   estante: { emoji: '📚', bg: '#F0E8D8', accent: '#9A8040' },
 };
 
+/** Tipo de navegación disponible desde la pestaña del catálogo. */
 type NavigationProp = BottomTabNavigationProp<MainTabParamList, 'Catalog'>;
 
+/**
+ * Renderiza el catálogo de muebles disponibles.
+ * @returns Pantalla con productos, filtros y acciones de navegación.
+ */
 export function CatalogScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { toggleFavorite, isFavorite } = useFavoritesStore();

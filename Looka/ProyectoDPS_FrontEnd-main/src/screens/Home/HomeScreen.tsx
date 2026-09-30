@@ -1,3 +1,11 @@
+/**
+ * @file HomeScreen.tsx
+ * @description Presenta la pantalla inicial y accesos principales del marketplace.
+ * Adapta la composición de las opciones al espacio disponible del dispositivo.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback } from 'react';
@@ -16,8 +24,13 @@ import { MENU_OPTIONS } from '../../utils/constants';
 import type { MainTabParamList } from '../../navigation/types';
 import { useFavoritesStore } from '../../store/useFavoritesStore';
 // Tipamos la navegación para que TypeScript sepa a qué pantallas podemos ir
+/** Navegación tipada disponible desde la pestaña de inicio. */
 type NavigationProp = BottomTabNavigationProp<MainTabParamList, 'Home'>;
 
+/**
+ * Renderiza la pantalla principal y sus accesos al producto.
+ * @returns Pantalla de inicio con las opciones principales de navegación.
+ */
 export function HomeScreen() {
   const { horizontalPadding, menuCardWidth } = useResponsiveLayout();
   const navigation = useNavigation<NavigationProp>();

@@ -1,3 +1,11 @@
+/**
+ * @file SplashScreen.tsx
+ * @description Presenta el estado inicial mientras se prepara la navegación.
+ * Comprueba las condiciones de acceso y redirige al flujo correspondiente.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -10,8 +18,13 @@ import { appConfig } from '../../config/appConfig';
 import type { RootStackParamList } from '../../navigation/types';
 
 // Tipamos la navegación para esta pantalla
+/** Navegación tipada durante la resolución de la sesión inicial. */
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
+/**
+ * Renderiza la pantalla de transición inicial de la aplicación.
+ * @returns Indicador de carga y elementos de identidad visual.
+ */
 export function SplashScreen() {
   const navigation = useNavigation<NavigationProp>();
 

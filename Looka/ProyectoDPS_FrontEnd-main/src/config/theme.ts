@@ -1,3 +1,11 @@
+/**
+ * @file theme.ts
+ * @description Define los tokens de color, tipografía y espaciado de la interfaz.
+ * Proporciona un tema común para mantener consistencia entre componentes.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { Platform } from 'react-native';
 import type { TextStyle, ViewStyle } from 'react-native';
 
@@ -106,6 +114,7 @@ const shadows = {
   }),
 } as const;
 
+/** Tokens de diseño utilizados en toda la interfaz móvil. */
 export const theme = {
   colors,
   spacing,
@@ -119,4 +128,5 @@ export const theme = {
   },
 } as const;
 
+/** Tipo derivado de los tokens de diseño definidos por la aplicación. */
 export type AppTheme = typeof theme;

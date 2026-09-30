@@ -1,3 +1,11 @@
+/**
+ * @file ARScreen.tsx
+ * @description Presenta la experiencia de visualización de muebles en realidad aumentada.
+ * Resuelve los recursos del modelo y los parámetros de navegación del elemento activo.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -33,8 +41,13 @@ const CATEGORY_META: Record<string, { emoji: string; color: string }> = {
   generado: { emoji: '🤖', color: '#F4A4B8' },
 };
 
+/** Tipo de ruta con los parámetros que recibe la pantalla de realidad aumentada. */
 type ARRouteProp = RouteProp<MainTabParamList, 'AR'>;
 
+/**
+ * Renderiza el visor de realidad aumentada para el mueble seleccionado.
+ * @returns Pantalla con el modelo 3D y sus controles de visualización.
+ */
 export function ARScreen() {
   const route = useRoute<ARRouteProp>();
   const preselectedItemId = route.params?.preselectedItemId;

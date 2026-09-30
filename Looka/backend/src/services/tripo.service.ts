@@ -1,8 +1,17 @@
+/**
+ * @file tripo.service.ts
+ * @description Integra el proveedor Tripo para generar modelos tridimensionales.
+ * Administra solicitudes remotas, seguimiento de trabajos y descarga de recursos.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import fs from 'fs';
 import path from 'path';
 
 const TRIPO_API_KEY = process.env.TRIPO_API_KEY || '';
 
+/** Traduce categorías internas a nombres aceptados por el proveedor de modelos. */
 export const CATEGORY_NAMES: Record<string, string> = {
   silla: 'Silla',
   mesa: 'Mesa',
@@ -16,6 +25,7 @@ export const CATEGORY_NAMES: Record<string, string> = {
   zapatero: 'Zapatero',
 };
 
+/** Resultado normalizado de una generación de modelo 3D. */
 export interface Generated3DModel {
   glbUrl: string;
   viewerUrl?: string;
@@ -58,8 +68,11 @@ async function downloadGlbLocally(remoteUrl: string, taskId: string): Promise<st
 }
 
 /**
- * Genera un modelo 3D con la API v3 de Tripo3D (con fallback a v2).
- * Prioriza el modelo base (más ligero) para AR.
+ * Genera un modelo 3D mediante la API v3 de Tripo, con fallback a v2.
+ * Prioriza el modelo base, más ligero para la experiencia de realidad aumentada.
+ * @param prompt Descripción del objeto que se generará.
+ * @returns URL del modelo y miniatura, o `null` si no se obtiene un modelo.
+ * @throws Error si falla la solicitud, el procesamiento remoto o la descarga.
  */
 export async function generateWithTripo3D(
   prompt: string
@@ -181,7 +194,11 @@ export async function generateWithTripo3D(
 }
 
 /**
- * Pipeline completo: valida que sea mueble + genera modelo 3D.
+ * Valida el resultado de Gemini y genera un modelo 3D normalizado para el servicio de IA.
+ * @param geminiResult Clasificación y descripción enriquecida devueltas por Gemini.
+ * @param startTime Instante inicial usado para calcular la duración del proceso.
+ * @returns Modelo generado o `null` cuando el flujo no produce un recurso.
+ * @throws Error si no es posible completar la generación.
  */
 export async function generate3DModelWithTripo(
   geminiResult: { isFurniture: boolean; category: string; enhancedPrompt: string },

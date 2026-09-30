@@ -1,3 +1,15 @@
+/**
+ * @file ForYouScreen.tsx
+ * @description Pantalla de generación de muebles con IA.
+ *
+ * Permite al usuario describir un mueble en lenguaje natural y enviarlo
+ * al backend para su generación con Gemini + Tripo3D. Muestra estados
+ * de carga, errores y el resultado final.
+ *
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -39,31 +51,29 @@ export function ForYouScreen() {
   const [generated, setGenerated] = useState<Furniture | null>(null);
   const [error, setError] = useState('');
 
-const handleGenerate = async () => {
-  if (prompt.trim().length < 3) {
-    setError('Describe tu mueble con al menos 3 caracteres');
-    return;
-  }
+  const handleGenerate = async () => {
+    if (prompt.trim().length < 3) {
+      setError('Describe tu mueble con al menos 3 caracteres');
+      return;
+    }
 
-  setLoading(true);
-  setError('');
-  setGenerated(null);
+    setLoading(true);
+    setError('');
+    setGenerated(null);
 
-  try {
-    const result = await AIService.generateFurniture(prompt);
-    setGenerated(result);
-    addGeneratedFurniture(result);
-  } catch (err: any) {
-  let backendMessage =
-    err?.response?.data?.message ||
-    (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')
-      ? 'La conexión tardó más de lo esperado. Revisa la pestaña AR por si el modelo se guardó.'
-      : 'No pudimos generar el mueble. Intenta de nuevo.');
-  setError(backendMessage);
-}finally {
-    setLoading(false);
-  }
-};
+    try {
+      const result = await AIService.generateFurniture(prompt);
+      setGenerated(result);
+      addGeneratedFurniture(result);
+    } catch (err: any) {
+      const backendMessage =
+        err?.response?.data?.message ||
+        'No pudimos generar el mueble. Intenta de nuevo.';
+      setError(backendMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSuggestion = (text: string) => {
     setPrompt(text);
@@ -108,32 +118,32 @@ const handleGenerate = async () => {
           ))}
         </ScrollView>
 
-       <Pressable
-  style={({ pressed }) => [
-    styles.button,
-    pressed && styles.buttonPressed,
-    loading && styles.buttonDisabled,
-  ]}
-  onPress={handleGenerate}
-  disabled={loading}
->
-  {loading ? (
-    <View style={styles.loadingRow}>
-      <ActivityIndicator color={theme.colors.white} />
-      <Text style={styles.buttonText}>Generando modelo 3D...</Text>
-    </View>
-  ) : (
-    <Text style={styles.buttonText}>✨ Generar con IA</Text>
-  )}
-</Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+            loading && styles.buttonDisabled,
+          ]}
+          onPress={handleGenerate}
+          disabled={loading}
+        >
+          {loading ? (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator color={theme.colors.white} />
+              <Text style={styles.buttonText}>Generando modelo 3D...</Text>
+            </View>
+          ) : (
+            <Text style={styles.buttonText}>✨ Generar con IA</Text>
+          )}
+        </Pressable>
 
-{loading && (
-  <View style={styles.progressHint}>
-    <Text style={styles.progressHintText}>
-      ✨ Tripo3D está diseñando tu mueble. Esto tarda entre 1.5 y 2.5 minutos.
-    </Text>
-  </View>
-)}
+        {loading && (
+          <View style={styles.progressHint}>
+            <Text style={styles.progressHintText}>
+              La IA está diseñando tu mueble. Esto puede tardar entre 1.5 y 2.5 minutos.
+            </Text>
+          </View>
+        )}
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -142,17 +152,36 @@ const handleGenerate = async () => {
             <View style={styles.resultHeader}>
               <Text style={styles.resultBadge}>🤖 GENERADO POR IA</Text>
             </View>
-            <Image
-              source={{ uri: generated.thumbnailUrl }}
-              style={styles.resultImage}
-            />
+            {generated.thumbnailUrl ? (
+              <Image
+                source={{ uri: generated.thumbnailUrl }}
+                style={styles.resultImage}
+              />
+            ) : (
+              <View
+                style={[
+                  styles.resultImage,
+                  {
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: theme.colors.primarySoft,
+                  },
+                ]}
+              >
+                <Text style={{ fontSize: 48 }}>🛋️</Text>
+              </View>
+            )}
             <Text style={styles.resultTitle}>{generated.name}</Text>
             <Text style={styles.resultDescription}>{generated.description}</Text>
 
             <View style={styles.resultActions}>
               <Pressable
                 style={styles.arButton}
-                onPress={() => navigation.navigate('AR')}
+                onPress={() =>
+                  navigation.navigate('AR', {
+                    preselectedItemId: generated.id,
+                  })
+                }
               >
                 <Text style={styles.arButtonText}>📷 Ver en mi espacio</Text>
               </Pressable>
@@ -175,7 +204,11 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     marginBottom: theme.spacing.xxs,
   },
-  title: { ...theme.typography.heading, color: theme.colors.text, fontSize: 26 },
+  title: {
+    ...theme.typography.heading,
+    color: theme.colors.text,
+    fontSize: 26,
+  },
   subtitle: {
     ...theme.typography.caption,
     color: theme.colors.textMuted,
@@ -200,19 +233,19 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   progressHint: {
-  backgroundColor: theme.colors.primarySoft,
-  paddingHorizontal: theme.spacing.md,
-  paddingVertical: theme.spacing.sm,
-  borderRadius: theme.radii.md,
-  marginBottom: theme.spacing.md,
-  marginTop: -theme.spacing.xs,
-},
-progressHintText: {
-  ...theme.typography.caption,
-  color: theme.colors.primaryDark,
-  textAlign: 'center',
-  lineHeight: 16,
-},
+    backgroundColor: theme.colors.primarySoft,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radii.md,
+    marginBottom: theme.spacing.md,
+    marginTop: -theme.spacing.xs,
+  },
+  progressHintText: {
+    ...theme.typography.caption,
+    color: theme.colors.primaryDark,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
   suggestionsLabel: {
     ...theme.typography.caption,
     color: theme.colors.textMuted,

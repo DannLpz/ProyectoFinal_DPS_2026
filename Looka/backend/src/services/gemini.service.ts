@@ -1,3 +1,11 @@
+/**
+ * @file gemini.service.ts
+ * @description Integra Gemini para enriquecer descripciones de muebles.
+ * Normaliza la respuesta del proveedor para el flujo de generación de modelos.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { GoogleGenAI, Type } from '@google/genai';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
@@ -18,6 +26,7 @@ const responseSchema = {
   required: ['isFurniture', 'category', 'enhancedPrompt'],
 };
 
+/** Estructura normalizada de los atributos generados por Gemini. */
 export interface GeminiResult {
   isFurniture: boolean;
   category: string;
@@ -84,6 +93,12 @@ function fallbackClassify(userPrompt: string): GeminiResult {
   };
 }
 
+/**
+ * Enriquece una descripción textual con atributos útiles para generar un mueble.
+ * @param prompt Descripción inicial proporcionada por el usuario.
+ * @returns Atributos estructurados obtenidos del modelo generativo.
+ * @throws Error si la configuración o la respuesta del proveedor no es válida.
+ */
 export async function enhancePromptWithGemini(
   userPrompt: string
 ): Promise<GeminiResult> {

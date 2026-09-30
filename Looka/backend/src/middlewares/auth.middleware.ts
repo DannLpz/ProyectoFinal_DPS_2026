@@ -8,6 +8,7 @@
  * el objeto `req` para que los controladores lo usen.
  *
  * @author Equipo LOOka
+ * @version 2.0.0
  */
 
 import { Request, Response, NextFunction } from 'express';
@@ -18,10 +19,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 /**
  * Middleware que valida el token JWT de la petición.
  *
- * @param {Request} req - Objeto de petición de Express
- * @param {Response} res - Objeto de respuesta de Express
- * @param {NextFunction} next - Callback para continuar al siguiente middleware
- * @returns {void} Llama a `next()` si el token es válido, o responde 401 si no
+ * @param req Objeto de petición de Express.
+ * @param res Objeto de respuesta de Express.
+ * @param next Callback para continuar al siguiente middleware.
+ * @returns Llama a `next()` si el token es válido o responde con estado 401.
  *
  * @example
  * router.get('/protected', authMiddleware, controller.action);

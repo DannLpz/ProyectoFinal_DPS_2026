@@ -1,13 +1,28 @@
+/**
+ * @file AppLogo.tsx
+ * @description Presenta la identidad visual de LOOka en las pantallas de la aplicación.
+ * Permite adaptar la variante cromática y mostrar una composición compacta.
+ * @author Equipo LOOka
+ * @version 2.0.0
+ */
+
 import { StyleSheet, Text, View } from 'react-native';
 
 import { appConfig } from '../../config/appConfig';
 import { theme } from '../../config/theme';
 
+/** Propiedades visuales disponibles para el logotipo de la aplicación. */
 interface AppLogoProps {
   compact?: boolean;
   variant?: 'dark' | 'light';
 }
 
+/**
+ * Renderiza el logotipo de LOOka con el formato solicitado.
+ * @param compact Indica si debe usarse la composición compacta.
+ * @param variant Variante visual aplicada al logotipo.
+ * @returns Elemento React Native con la marca de la aplicación.
+ */
 export function AppLogo({ compact = false, variant = 'dark' }: AppLogoProps) {
   const isLight = variant === 'light';
 
